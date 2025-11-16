@@ -229,12 +229,236 @@ This stateless architecture ensures optimal resource utilization and horizontal 
 
 ## On-Premises Installation Steps (Detailed)
 
-### Prerequisites
+### System Prerequisites
 
-1. Oracle Database installed (11.2.0.4 or later recommended)
-2. Java JDK 11 or later (for ORDS)
-3. Minimum 2GB RAM (4GB+ recommended)
-4. Sufficient disk space for database and APEX images (~1GB)
+#### Hardware Requirements
+- **CPU**: 2+ cores minimum (4+ cores recommended)
+- **RAM**: 4GB minimum (8GB+ recommended for development, 16GB+ for production)
+- **Disk Space**: 
+  - 20GB for Oracle Database XE
+  - 50GB for Oracle Database SE/EE
+  - Additional 10GB for APEX and ORDS
+  - 20GB+ free space for application data and logs
+- **Network**: Static IP or stable network connection
+
+#### Software Prerequisites (Ubuntu 24.04 LTS)
+
+**1. Update System Packages**
+```bash
+sudo apt update && sudo apt upgrade -y
+```
+
+**2. Install Required System Packages**
+```bash
+# Essential build tools and libraries
+sudo apt install -y build-essential gcc make binutils \
+    libaio1 libaio-dev libstdc++6 ksh unzip wget curl \
+    perl libcap2-bin
+
+# Additional dependencies for Oracle Database
+sudo apt install -y alien libaio1 unixodbc unixodbc-dev \
+    expat libexpat1 libexpat1-dev libxml2 libxml2-dev \
+    zlib1g-dev libssl-dev
+```
+
+**3. Install Java Development Kit (JDK 17 or later for ORDS)**
+```bash
+# Install OpenJDK 17 (recommended for ORDS)
+sudo apt install -y openjdk-17-jdk openjdk-17-jre
+
+# Verify Java installation
+java -version
+
+# Set JAVA_HOME environment variable
+echo 'export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64' | sudo tee -a /etc/profile.d/java.sh
+echo 'export PATH=$JAVA_HOME/bin:$PATH' | sudo tee -a /etc/profile.d/java.sh
+source /etc/profile.d/java.sh
+
+# Verify JAVA_HOME
+echo $JAVA_HOME
+```
+
+**4. Configure System Parameters for Oracle Database**
+```bash
+# Create oracle user and groups
+sudo groupadd -g 54321 oinstall
+sudo groupadd -g 54322 dba
+sudo groupadd -g 54323 oper
+sudo useradd -u 54321 -g oinstall -G dba,oper oracle
+
+# Set password for oracle user
+sudo passwd oracle
+
+# Create Oracle directories
+sudo mkdir -p /u01/app/oracle/product/19.3.0/dbhome_1
+sudo mkdir -p /u02/oradata
+sudo chown -R oracle:oinstall /u01 /u02
+sudo chmod -R 775 /u01 /u02
+
+# Configure kernel parameters
+sudo tee -a /etc/sysctl.conf > /dev/null <<EOL
+fs.file-max = 6815744
+kernel.sem = 250 32000 100 128
+kernel.shmmni = 4096
+kernel.shmall = 1073741824
+kernel.shmmax = 4398046511104
+kernel.panic_on_oops = 1
+net.core.rmem_default = 262144
+net.core.rmem_max = 4194304
+net.core.wmem_default = 262144
+net.core.wmem_max = 1048576
+net.ipv4.conf.all.rp_filter = 2
+net.ipv4.conf.default.rp_filter = 2
+fs.aio-max-nr = 1048576
+net.ipv4.ip_local_port_range = 9000 65500
+EOL
+
+# Apply kernel parameters
+sudo sysctl -p
+
+# Configure resource limits
+sudo tee -a /etc/security/limits.conf > /dev/null <<EOL
+oracle soft nofile 1024
+oracle hard nofile 65536
+oracle soft nproc 16384
+oracle hard nproc 16384
+oracle soft stack 10240
+oracle hard stack 32768
+oracle hard memlock 134217728
+oracle soft memlock 134217728
+EOL
+```
+
+**5. Configure Firewall (if enabled)**
+```bash
+# Allow Oracle Database listener (default port 1521)
+sudo ufw allow 1521/tcp
+
+# Allow ORDS/APEX HTTP port (default 8080)
+sudo ufw allow 8080/tcp
+
+# Allow ORDS/APEX HTTPS port (default 8443)
+sudo ufw allow 8443/tcp
+
+# Reload firewall
+sudo ufw reload
+```
+
+#### Oracle Database Installation (Oracle 19c or 23ai)
+
+**Option 1: Oracle Database 23ai Free (Recommended for Development)**
+
+```bash
+# Download Oracle Database 23ai Free RPM
+wget https://download.oracle.com/otn-pub/otn_software/db-free/oracle-database-free-23ai-1.0-1.el8.x86_64.rpm
+
+# Convert RPM to DEB using alien
+sudo alien --scripts oracle-database-free-23ai-1.0-1.el8.x86_64.rpm
+
+# Install the converted package
+sudo dpkg -i oracle-database-free-23ai_1.0-2_amd64.deb
+
+# Configure database (this creates and starts the database)
+sudo /etc/init.d/oracle-free-23ai configure
+
+# The database will be created with:
+# - SID: FREE
+# - Port: 1521
+# - SYS/SYSTEM password: (you'll be prompted)
+```
+
+**Option 2: Oracle Database 19c Enterprise/Standard Edition**
+
+```bash
+# Download Oracle Database 19c installation files from oracle.com
+# Extract the zip file
+unzip LINUX.X64_193000_db_home.zip -d /u01/app/oracle/product/19.3.0/dbhome_1/
+
+# Switch to oracle user
+su - oracle
+
+# Set environment variables
+export ORACLE_BASE=/u01/app/oracle
+export ORACLE_HOME=/u01/app/oracle/product/19.3.0/dbhome_1
+export ORACLE_SID=ORCL
+export PATH=$ORACLE_HOME/bin:$PATH
+
+# Run silent installation
+cd $ORACLE_HOME
+./runInstaller -silent -responseFile $ORACLE_HOME/install/response/db_install.rsp \
+    oracle.install.option=INSTALL_DB_SWONLY \
+    UNIX_GROUP_NAME=oinstall \
+    INVENTORY_LOCATION=/u01/app/oraInventory \
+    ORACLE_BASE=/u01/app/oracle \
+    ORACLE_HOME=/u01/app/oracle/product/19.3.0/dbhome_1 \
+    oracle.install.db.InstallEdition=EE \
+    oracle.install.db.OSDBA_GROUP=dba \
+    oracle.install.db.OSOPER_GROUP=oper \
+    oracle.install.db.OSBACKUPDBA_GROUP=dba \
+    oracle.install.db.OSDGDBA_GROUP=dba \
+    oracle.install.db.OSKMDBA_GROUP=dba \
+    oracle.install.db.OSRACDBA_GROUP=dba \
+    DECLINE_SECURITY_UPDATES=true
+
+# Run root scripts as instructed by installer
+# Exit oracle user and run as root:
+# sudo /u01/app/oraInventory/orainstRoot.sh
+# sudo /u01/app/oracle/product/19.3.0/dbhome_1/root.sh
+
+# Create database using DBCA
+dbca -silent -createDatabase \
+    -templateName General_Purpose.dbc \
+    -gdbname ORCL \
+    -sid ORCL \
+    -responseFile NO_VALUE \
+    -characterSet AL32UTF8 \
+    -sysPassword YourSysPassword \
+    -systemPassword YourSystemPassword \
+    -createAsContainerDatabase false \
+    -databaseType MULTIPURPOSE \
+    -automaticMemoryManagement false \
+    -storageType FS \
+    -datafileDestination /u02/oradata \
+    -redoLogFileSize 50 \
+    -emConfiguration NONE \
+    -ignorePreReqs
+```
+
+**Configure Oracle Environment Variables (add to .bashrc)**
+```bash
+# Add to /home/oracle/.bashrc
+cat >> /home/oracle/.bashrc <<EOL
+
+# Oracle Environment
+export ORACLE_BASE=/u01/app/oracle
+export ORACLE_HOME=/u01/app/oracle/product/19.3.0/dbhome_1
+export ORACLE_SID=ORCL
+export PATH=\$ORACLE_HOME/bin:\$PATH
+export LD_LIBRARY_PATH=\$ORACLE_HOME/lib:/lib:/usr/lib
+export CLASSPATH=\$ORACLE_HOME/jlib:\$ORACLE_HOME/rdbms/jlib
+EOL
+
+source /home/oracle/.bashrc
+```
+
+**Verify Database Installation**
+```bash
+# Connect to database
+sqlplus / as sysdba
+
+# Check database status
+SELECT instance_name, status FROM v\$instance;
+
+# Should show: ORCL, OPEN
+```
+
+### APEX Installation Prerequisites
+
+1. Oracle Database installed and running (11.2.0.4 or later recommended)
+2. Java JDK 17 or later (for ORDS) - already installed above
+3. Minimum 4GB RAM allocated to database (8GB+ recommended)
+4. Sufficient disk space for database and APEX images (~10GB)
+5. Internet connectivity (for downloading APEX and ORDS)
 
 ### Step-by-Step Installation Process
 

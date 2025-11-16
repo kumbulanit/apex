@@ -241,10 +241,15 @@ Home → SQL Workshop → Object Browser → Create →
 - ✅ Indexes tab shows 3 indexes (1 PK, 2 Unique)
 - ✅ Data tab shows 0 rows (table is empty)
 
-🔗 **Reference Screenshots:**
-- [Create Table Dialog](https://docs.oracle.com/en/database/oracle/apex/23.1/htmdb/img/create_table.png)
-- [Object Browser](https://docs.oracle.com/en/database/oracle/apex/23.1/htmdb/img/object_browser.png)
-- [Table Columns View](https://docs.oracle.com/en/database/oracle/apex/23.1/htmdb/img/table_columns.png)
+📸 **Visual Reference:**
+
+![Object Browser](images/lab-01/lab-01-step-05-object-browser-empty.png)
+*Figure 1: Object Browser with no tables (initial state)*
+
+![Create Table Dialog](images/lab-01/lab-01-step-07-create-table-dialog.png)
+*Figure 2: Create Table Dialog showing column configuration*
+
+🔗 **Documentation:** [Creating Tables Guide](https://docs.oracle.com/en/database/oracle/apex/23.1/htmdb/creating-a-database-table.html)
 
 💡 **Pro Tips:**
 - Use copy-paste for long column lists (faster than wizard)
@@ -591,10 +596,21 @@ Home → SQL Workshop → Object Browser → Create →
 - ✅ Top-right shows username with dropdown
 - ✅ Application has Vodacom branding
 
-🔗 **Reference Screenshots:**
-- [Create App Wizard](https://docs.oracle.com/en/database/oracle/apex/23.1/htmdb/img/create_app_wizard.png)
-- [Application Home](https://docs.oracle.com/en/database/oracle/apex/23.1/htmdb/img/application_home.png)
-- [Running Application](https://docs.oracle.com/en/database/oracle/apex/23.1/htmdb/img/running_app.png)
+📸 **Visual Reference:**
+
+![App Builder Home](images/lab-02/lab-02-step-01-app-builder-home.png)
+*Figure 1: App Builder home with Create button*
+
+![Create Application Wizard](images/lab-02/lab-02-step-04-app-wizard-name.png)
+*Figure 2: Create Application wizard - Name your application*
+
+![Application Home](images/lab-02/lab-02-step-08-application-home.png)
+*Figure 3: Application home page showing all pages*
+
+![Running Application](images/lab-02/lab-02-step-10-running-app.png)
+*Figure 4: Your application running in the browser*
+
+🔗 **Documentation:** [Creating Applications Guide](https://docs.oracle.com/en/database/oracle/apex/23.1/htmdb/creating-database-application.html)
 
 💡 **Pro Tips:**
 - ⚡ Interactive Report + Form combo is most common pattern

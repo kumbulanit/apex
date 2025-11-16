@@ -13,23 +13,46 @@
 -- - Enterprise solutions
 -- - Broadband and fiber services
 --
--- INSTRUCTIONS:
+-- ⚠️ IMPORTANT INSTRUCTIONS - READ BEFORE RUNNING:
+--
+-- METHOD 1: SQL Scripts (RECOMMENDED):
 -- 1. Log into your APEX workspace as the workspace administrator
 -- 2. Navigate to SQL Workshop > SQL Scripts
--- 3. Click "Upload" and upload this file
--- 4. Click "Run" to execute the script
--- 5. Verify all tables were created successfully (check for errors)
+-- 3. Click "Upload" and select this file
+-- 4. Click "Run" button (NOT "Run Now")
+-- 5. Review the results - all tables should be created successfully
+--
+-- METHOD 2: SQL Commands (NOT RECOMMENDED - Will show errors):
+-- Running in SQL Commands will show "table or view does not exist" errors
+-- because it tries to parse all statements before executing them.
+-- Always use SQL Scripts instead.
 --
 -- ESTIMATED TIME: 2-3 minutes
+-- TABLES CREATED: 13 tables with sample data
+-- SAMPLE RECORDS: ~200+ records across all tables
 -- ============================================================================
 
--- Clean up existing objects (if re-running script)
+-- ============================================================================
+-- CLEANUP: Drop existing objects (if re-running script)
+-- ============================================================================
 BEGIN
-    FOR rec IN (SELECT table_name FROM user_tables WHERE table_name LIKE 'VODACOM_%') LOOP
-        EXECUTE IMMEDIATE 'DROP TABLE ' || rec.table_name || ' CASCADE CONSTRAINTS';
+    -- Drop tables in reverse dependency order
+    FOR rec IN (SELECT table_name FROM user_tables WHERE table_name LIKE 'VODACOM_%' ORDER BY table_name DESC) LOOP
+        BEGIN
+            EXECUTE IMMEDIATE 'DROP TABLE ' || rec.table_name || ' CASCADE CONSTRAINTS';
+            DBMS_OUTPUT.PUT_LINE('Dropped table: ' || rec.table_name);
+        EXCEPTION
+            WHEN OTHERS THEN
+                DBMS_OUTPUT.PUT_LINE('Could not drop ' || rec.table_name || ': ' || SQLERRM);
+        END;
     END LOOP;
+    DBMS_OUTPUT.PUT_LINE('Cleanup complete.');
 END;
 /
+
+-- ============================================================================
+-- PHASE 1: CREATE ALL TABLES (WITHOUT foreign keys first)
+-- ============================================================================
 
 -- ============================================================================
 -- VODACOM_DEPARTMENTS TABLE
@@ -49,10 +72,6 @@ CREATE TABLE vodacom_departments (
     modified_date     DATE,
     modified_by       VARCHAR2(100)
 );
-
-COMMENT ON TABLE vodacom_departments IS 'Vodacom organizational departments and divisions';
-COMMENT ON COLUMN vodacom_departments.dept_code IS 'Short code for department (e.g., CS=Customer Service, NO=Network Ops)';
-COMMENT ON COLUMN vodacom_departments.cost_center IS 'Financial cost center code';
 
 -- ============================================================================
 -- VODACOM_EMPLOYEES TABLE
@@ -77,19 +96,8 @@ CREATE TABLE vodacom_employees (
     employee_number   VARCHAR2(20) NOT NULL UNIQUE,
     branch_code       VARCHAR2(20),
     commission_rate   NUMBER(5,2),
-    created_date      DATE DEFAULT SYSDATE,
-    CONSTRAINT fk_emp_dept FOREIGN KEY (dept_id) REFERENCES vodacom_departments(dept_id),
-    CONSTRAINT fk_emp_manager FOREIGN KEY (manager_id) REFERENCES vodacom_employees(emp_id)
+    created_date      DATE DEFAULT SYSDATE
 );
-
-CREATE INDEX idx_emp_dept ON vodacom_employees(dept_id);
-CREATE INDEX idx_emp_status ON vodacom_employees(status);
-CREATE INDEX idx_emp_manager ON vodacom_employees(manager_id);
-
-COMMENT ON TABLE vodacom_employees IS 'Vodacom employees and staff members';
-COMMENT ON COLUMN vodacom_employees.employee_number IS 'Unique employee ID (e.g., VDC001234)';
-COMMENT ON COLUMN vodacom_employees.branch_code IS 'Branch location code';
-COMMENT ON COLUMN vodacom_employees.commission_rate IS 'Sales commission percentage';
 
 -- ============================================================================
 -- VODACOM_CUSTOMERS TABLE
@@ -118,18 +126,8 @@ CREATE TABLE vodacom_customers (
     last_updated      DATE,
     assigned_agent_id NUMBER,
     vodapay_active    VARCHAR2(1) DEFAULT 'N' CHECK (vodapay_active IN ('Y','N')),
-    created_date      DATE DEFAULT SYSDATE,
-    CONSTRAINT fk_cust_agent FOREIGN KEY (assigned_agent_id) REFERENCES vodacom_employees(emp_id)
+    created_date      DATE DEFAULT SYSDATE
 );
-
-CREATE INDEX idx_cust_status ON vodacom_customers(account_status);
-CREATE INDEX idx_cust_type ON vodacom_customers(customer_type);
-CREATE INDEX idx_cust_agent ON vodacom_customers(assigned_agent_id);
-CREATE INDEX idx_cust_idnum ON vodacom_customers(id_number);
-
-COMMENT ON TABLE vodacom_customers IS 'Vodacom customer accounts and profiles';
-COMMENT ON COLUMN vodacom_customers.account_number IS 'Unique customer account number (e.g., VDC-ACC-123456)';
-COMMENT ON COLUMN vodacom_customers.vodapay_active IS 'Whether customer uses VodaPay mobile payment';
 
 -- ============================================================================
 -- VODACOM_MOBILE_NUMBERS TABLE
@@ -153,17 +151,8 @@ CREATE TABLE vodacom_mobile_numbers (
     sms_balance       NUMBER(6,0) DEFAULT 0,
     last_recharge_date DATE,
     last_usage_date   DATE,
-    created_date      DATE DEFAULT SYSDATE,
-    CONSTRAINT fk_num_customer FOREIGN KEY (customer_id) REFERENCES vodacom_customers(customer_id)
+    created_date      DATE DEFAULT SYSDATE
 );
-
-CREATE INDEX idx_num_customer ON vodacom_mobile_numbers(customer_id);
-CREATE INDEX idx_num_status ON vodacom_mobile_numbers(status);
-CREATE INDEX idx_num_type ON vodacom_mobile_numbers(number_type);
-
-COMMENT ON TABLE vodacom_mobile_numbers IS 'Mobile numbers and SIM cards assigned to customers';
-COMMENT ON COLUMN vodacom_mobile_numbers.data_balance_mb IS 'Remaining data balance in megabytes';
-COMMENT ON COLUMN vodacom_mobile_numbers.airtime_balance IS 'Prepaid airtime balance in Rands';
 
 -- ============================================================================
 -- VODACOM_PACKAGES TABLE
@@ -189,12 +178,6 @@ CREATE TABLE vodacom_packages (
     created_date      DATE DEFAULT SYSDATE
 );
 
-CREATE INDEX idx_pkg_type ON vodacom_packages(package_type);
-CREATE INDEX idx_pkg_active ON vodacom_packages(is_active);
-
-COMMENT ON TABLE vodacom_packages IS 'Vodacom service packages and bundles';
-COMMENT ON COLUMN vodacom_packages.validity_days IS 'Number of days package remains valid';
-
 -- ============================================================================
 -- VODACOM_TRANSACTIONS TABLE
 -- All transactions (recharges, purchases, payments, VodaPay)
@@ -219,19 +202,8 @@ CREATE TABLE vodacom_transactions (
     channel           VARCHAR2(30) 
                       CHECK (channel IN ('USSD','App','Web','Store','Call Center','ATM','Agent')),
     notes             VARCHAR2(500),
-    created_date      DATE DEFAULT SYSDATE,
-    CONSTRAINT fk_trans_customer FOREIGN KEY (customer_id) REFERENCES vodacom_customers(customer_id),
-    CONSTRAINT fk_trans_package FOREIGN KEY (package_id) REFERENCES vodacom_packages(package_id),
-    CONSTRAINT fk_trans_emp FOREIGN KEY (processed_by) REFERENCES vodacom_employees(emp_id)
+    created_date      DATE DEFAULT SYSDATE
 );
-
-CREATE INDEX idx_trans_customer ON vodacom_transactions(customer_id);
-CREATE INDEX idx_trans_date ON vodacom_transactions(transaction_date);
-CREATE INDEX idx_trans_type ON vodacom_transactions(transaction_type);
-CREATE INDEX idx_trans_status ON vodacom_transactions(status);
-
-COMMENT ON TABLE vodacom_transactions IS 'All customer transactions including purchases and payments';
-COMMENT ON COLUMN vodacom_transactions.channel IS 'Transaction channel/source';
 
 -- ============================================================================
 -- VODACOM_NETWORK_TOWERS TABLE
@@ -260,13 +232,6 @@ CREATE TABLE vodacom_network_towers (
     created_date      DATE DEFAULT SYSDATE
 );
 
-CREATE INDEX idx_tower_status ON vodacom_network_towers(status);
-CREATE INDEX idx_tower_type ON vodacom_network_towers(tower_type);
-CREATE INDEX idx_tower_province ON vodacom_network_towers(province);
-
-COMMENT ON TABLE vodacom_network_towers IS 'Network towers and base stations';
-COMMENT ON COLUMN vodacom_network_towers.capacity IS 'Maximum concurrent connections';
-
 -- ============================================================================
 -- VODACOM_NETWORK_ISSUES TABLE
 -- Network outages, maintenance, and technical issues
@@ -291,17 +256,8 @@ CREATE TABLE vodacom_network_issues (
                       CHECK (status IN ('Open','Acknowledged','In Progress','Resolved','Closed')),
     assigned_to       NUMBER,
     resolution_notes  VARCHAR2(1000),
-    created_date      DATE DEFAULT SYSDATE,
-    CONSTRAINT fk_issue_tower FOREIGN KEY (tower_id) REFERENCES vodacom_network_towers(tower_id),
-    CONSTRAINT fk_issue_emp FOREIGN KEY (assigned_to) REFERENCES vodacom_employees(emp_id)
+    created_date      DATE DEFAULT SYSDATE
 );
-
-CREATE INDEX idx_issue_status ON vodacom_network_issues(status);
-CREATE INDEX idx_issue_severity ON vodacom_network_issues(severity);
-CREATE INDEX idx_issue_tower ON vodacom_network_issues(tower_id);
-CREATE INDEX idx_issue_date ON vodacom_network_issues(reported_date);
-
-COMMENT ON TABLE vodacom_network_issues IS 'Network outages and technical issues';
 
 -- ============================================================================
 -- VODACOM_CUSTOMER_SUPPORT TABLE
@@ -330,18 +286,8 @@ CREATE TABLE vodacom_customer_support (
     resolved_date     TIMESTAMP,
     closed_date       TIMESTAMP,
     resolution        VARCHAR2(2000),
-    customer_satisfaction NUMBER(1,0) CHECK (customer_satisfaction BETWEEN 1 AND 5),
-    CONSTRAINT fk_support_customer FOREIGN KEY (customer_id) REFERENCES vodacom_customers(customer_id),
-    CONSTRAINT fk_support_emp FOREIGN KEY (assigned_to) REFERENCES vodacom_employees(emp_id)
+    customer_satisfaction NUMBER(1,0) CHECK (customer_satisfaction BETWEEN 1 AND 5)
 );
-
-CREATE INDEX idx_support_customer ON vodacom_customer_support(customer_id);
-CREATE INDEX idx_support_status ON vodacom_customer_support(status);
-CREATE INDEX idx_support_priority ON vodacom_customer_support(priority);
-CREATE INDEX idx_support_assigned ON vodacom_customer_support(assigned_to);
-CREATE INDEX idx_support_date ON vodacom_customer_support(created_date);
-
-COMMENT ON TABLE vodacom_customer_support IS 'Customer support tickets and service requests';
 
 -- ============================================================================
 -- VODACOM_SALES TABLE
@@ -366,17 +312,8 @@ CREATE TABLE vodacom_sales (
     commission_amount NUMBER(10,2),
     branch_code       VARCHAR2(20),
     notes             VARCHAR2(500),
-    created_date      DATE DEFAULT SYSDATE,
-    CONSTRAINT fk_sales_customer FOREIGN KEY (customer_id) REFERENCES vodacom_customers(customer_id),
-    CONSTRAINT fk_sales_agent FOREIGN KEY (sales_agent_id) REFERENCES vodacom_employees(emp_id)
+    created_date      DATE DEFAULT SYSDATE
 );
-
-CREATE INDEX idx_sales_customer ON vodacom_sales(customer_id);
-CREATE INDEX idx_sales_agent ON vodacom_sales(sales_agent_id);
-CREATE INDEX idx_sales_date ON vodacom_sales(sale_date);
-CREATE INDEX idx_sales_type ON vodacom_sales(sale_type);
-
-COMMENT ON TABLE vodacom_sales IS 'Sales transactions for contracts, devices, and services';
 
 -- ============================================================================
 -- VODACOM_VODAPAY_ACCOUNTS TABLE
@@ -397,15 +334,8 @@ CREATE TABLE vodacom_vodapay_accounts (
     last_transaction  DATE,
     total_spent       NUMBER(12,2) DEFAULT 0,
     total_received    NUMBER(12,2) DEFAULT 0,
-    created_date      DATE DEFAULT SYSDATE,
-    CONSTRAINT fk_vodapay_customer FOREIGN KEY (customer_id) REFERENCES vodacom_customers(customer_id)
+    created_date      DATE DEFAULT SYSDATE
 );
-
-CREATE INDEX idx_vodapay_status ON vodacom_vodapay_accounts(status);
-CREATE INDEX idx_vodapay_mobile ON vodacom_vodapay_accounts(linked_mobile);
-
-COMMENT ON TABLE vodacom_vodapay_accounts IS 'VodaPay mobile payment wallet accounts';
-COMMENT ON COLUMN vodacom_vodapay_accounts.kyc_verified IS 'Know Your Customer verification status';
 
 -- ============================================================================
 -- VODACOM_INVOICES TABLE
@@ -429,17 +359,8 @@ CREATE TABLE vodacom_invoices (
     payment_date      DATE,
     generated_by      NUMBER,
     notes             VARCHAR2(500),
-    created_date      DATE DEFAULT SYSDATE,
-    CONSTRAINT fk_invoice_customer FOREIGN KEY (customer_id) REFERENCES vodacom_customers(customer_id),
-    CONSTRAINT fk_invoice_emp FOREIGN KEY (generated_by) REFERENCES vodacom_employees(emp_id)
+    created_date      DATE DEFAULT SYSDATE
 );
-
-CREATE INDEX idx_invoice_customer ON vodacom_invoices(customer_id);
-CREATE INDEX idx_invoice_status ON vodacom_invoices(status);
-CREATE INDEX idx_invoice_date ON vodacom_invoices(invoice_date);
-CREATE INDEX idx_invoice_due ON vodacom_invoices(due_date);
-
-COMMENT ON TABLE vodacom_invoices IS 'Monthly invoices for postpaid customers';
 
 -- ============================================================================
 -- VODACOM_INVOICE_ITEMS TABLE
@@ -456,17 +377,107 @@ CREATE TABLE vodacom_invoice_items (
     quantity          NUMBER(10,2),
     unit_price        NUMBER(10,2),
     amount            NUMBER(10,2) NOT NULL,
-    created_date      DATE DEFAULT SYSDATE,
-    CONSTRAINT fk_item_invoice FOREIGN KEY (invoice_id) REFERENCES vodacom_invoices(invoice_id) ON DELETE CASCADE
+    created_date      DATE DEFAULT SYSDATE
 );
 
+-- Commit table creation
+COMMIT;
+
+-- ============================================================================
+-- PHASE 2: ADD FOREIGN KEYS, INDEXES, AND COMMENTS
+-- ============================================================================
+
+-- Add Foreign Keys
+ALTER TABLE vodacom_employees ADD CONSTRAINT fk_emp_dept FOREIGN KEY (dept_id) REFERENCES vodacom_departments(dept_id);
+ALTER TABLE vodacom_employees ADD CONSTRAINT fk_emp_manager FOREIGN KEY (manager_id) REFERENCES vodacom_employees(emp_id);
+ALTER TABLE vodacom_departments ADD CONSTRAINT fk_dept_manager FOREIGN KEY (manager_id) REFERENCES vodacom_employees(emp_id);
+ALTER TABLE vodacom_customers ADD CONSTRAINT fk_cust_agent FOREIGN KEY (assigned_agent_id) REFERENCES vodacom_employees(emp_id);
+ALTER TABLE vodacom_mobile_numbers ADD CONSTRAINT fk_num_customer FOREIGN KEY (customer_id) REFERENCES vodacom_customers(customer_id);
+ALTER TABLE vodacom_transactions ADD CONSTRAINT fk_trans_customer FOREIGN KEY (customer_id) REFERENCES vodacom_customers(customer_id);
+ALTER TABLE vodacom_transactions ADD CONSTRAINT fk_trans_package FOREIGN KEY (package_id) REFERENCES vodacom_packages(package_id);
+ALTER TABLE vodacom_transactions ADD CONSTRAINT fk_trans_emp FOREIGN KEY (processed_by) REFERENCES vodacom_employees(emp_id);
+ALTER TABLE vodacom_network_issues ADD CONSTRAINT fk_issue_tower FOREIGN KEY (tower_id) REFERENCES vodacom_network_towers(tower_id);
+ALTER TABLE vodacom_network_issues ADD CONSTRAINT fk_issue_emp FOREIGN KEY (assigned_to) REFERENCES vodacom_employees(emp_id);
+ALTER TABLE vodacom_customer_support ADD CONSTRAINT fk_support_customer FOREIGN KEY (customer_id) REFERENCES vodacom_customers(customer_id);
+ALTER TABLE vodacom_customer_support ADD CONSTRAINT fk_support_emp FOREIGN KEY (assigned_to) REFERENCES vodacom_employees(emp_id);
+ALTER TABLE vodacom_sales ADD CONSTRAINT fk_sales_customer FOREIGN KEY (customer_id) REFERENCES vodacom_customers(customer_id);
+ALTER TABLE vodacom_sales ADD CONSTRAINT fk_sales_agent FOREIGN KEY (sales_agent_id) REFERENCES vodacom_employees(emp_id);
+ALTER TABLE vodacom_vodapay_accounts ADD CONSTRAINT fk_vodapay_customer FOREIGN KEY (customer_id) REFERENCES vodacom_customers(customer_id);
+ALTER TABLE vodacom_invoices ADD CONSTRAINT fk_invoice_customer FOREIGN KEY (customer_id) REFERENCES vodacom_customers(customer_id);
+ALTER TABLE vodacom_invoices ADD CONSTRAINT fk_invoice_emp FOREIGN KEY (generated_by) REFERENCES vodacom_employees(emp_id);
+ALTER TABLE vodacom_invoice_items ADD CONSTRAINT fk_item_invoice FOREIGN KEY (invoice_id) REFERENCES vodacom_invoices(invoice_id) ON DELETE CASCADE;
+
+-- Create Indexes
+CREATE INDEX idx_emp_dept ON vodacom_employees(dept_id);
+CREATE INDEX idx_emp_status ON vodacom_employees(status);
+CREATE INDEX idx_emp_manager ON vodacom_employees(manager_id);
+CREATE INDEX idx_cust_type ON vodacom_customers(customer_type);
+CREATE INDEX idx_cust_province ON vodacom_customers(province);
+CREATE INDEX idx_cust_agent ON vodacom_customers(assigned_agent_id);
+CREATE INDEX idx_cust_status ON vodacom_customers(account_status);
+CREATE INDEX idx_cust_vodapay ON vodacom_customers(vodapay_active);
+CREATE INDEX idx_mobile_customer ON vodacom_mobile_numbers(customer_id);
+CREATE INDEX idx_mobile_type ON vodacom_mobile_numbers(number_type);
+CREATE INDEX idx_mobile_status ON vodacom_mobile_numbers(status);
+CREATE INDEX idx_mobile_sim ON vodacom_mobile_numbers(sim_card_number);
+CREATE INDEX idx_pkg_category ON vodacom_packages(category);
+CREATE INDEX idx_pkg_type ON vodacom_packages(package_type);
+CREATE INDEX idx_pkg_active ON vodacom_packages(is_active);
+CREATE INDEX idx_tower_status ON vodacom_network_towers(status);
+CREATE INDEX idx_tower_type ON vodacom_network_towers(tower_type);
+CREATE INDEX idx_tower_province ON vodacom_network_towers(province);
+CREATE INDEX idx_issue_status ON vodacom_network_issues(status);
+CREATE INDEX idx_issue_severity ON vodacom_network_issues(severity);
+CREATE INDEX idx_issue_tower ON vodacom_network_issues(tower_id);
+CREATE INDEX idx_issue_date ON vodacom_network_issues(reported_date);
+CREATE INDEX idx_support_customer ON vodacom_customer_support(customer_id);
+CREATE INDEX idx_support_status ON vodacom_customer_support(status);
+CREATE INDEX idx_support_priority ON vodacom_customer_support(priority);
+CREATE INDEX idx_support_assigned ON vodacom_customer_support(assigned_to);
+CREATE INDEX idx_support_date ON vodacom_customer_support(created_date);
+CREATE INDEX idx_sale_customer ON vodacom_sales(customer_id);
+CREATE INDEX idx_sale_date ON vodacom_sales(sale_date);
+CREATE INDEX idx_sale_type ON vodacom_sales(sale_type);
+CREATE INDEX idx_sale_agent ON vodacom_sales(sales_agent_id);
+CREATE INDEX idx_vodapay_customer ON vodacom_vodapay_accounts(customer_id);
+CREATE INDEX idx_vodapay_wallet ON vodacom_vodapay_accounts(wallet_number);
+CREATE INDEX idx_vodapay_status ON vodacom_vodapay_accounts(status);
+CREATE INDEX idx_invoice_customer ON vodacom_invoices(customer_id);
+CREATE INDEX idx_invoice_date ON vodacom_invoices(invoice_date);
+CREATE INDEX idx_invoice_status ON vodacom_invoices(status);
 CREATE INDEX idx_item_invoice ON vodacom_invoice_items(invoice_id);
 CREATE INDEX idx_item_type ON vodacom_invoice_items(item_type);
 
+-- Add Table Comments
+COMMENT ON TABLE vodacom_departments IS 'Vodacom organizational departments and divisions';
+COMMENT ON COLUMN vodacom_departments.dept_code IS 'Short code for department (e.g., CS=Customer Service, NO=Network Ops)';
+COMMENT ON COLUMN vodacom_departments.cost_center IS 'Financial cost center code';
+COMMENT ON TABLE vodacom_employees IS 'Vodacom employees and staff members';
+COMMENT ON COLUMN vodacom_employees.employee_number IS 'Unique employee ID (e.g., VDC001234)';
+COMMENT ON COLUMN vodacom_employees.branch_code IS 'Branch location code';
+COMMENT ON COLUMN vodacom_employees.commission_rate IS 'Sales commission percentage';
+COMMENT ON TABLE vodacom_customers IS 'Vodacom customer master data';
+COMMENT ON COLUMN vodacom_customers.account_number IS 'Unique customer account (e.g., VDC-ACC-100001)';
+COMMENT ON COLUMN vodacom_customers.customer_type IS 'Individual consumer or Business entity';
+COMMENT ON TABLE vodacom_mobile_numbers IS 'Mobile phone numbers assigned to customers';
+COMMENT ON COLUMN vodacom_mobile_numbers.number_type IS 'Prepaid, Postpaid, or Contract';
+COMMENT ON COLUMN vodacom_mobile_numbers.sim_card_number IS 'Physical SIM card ICCID';
+COMMENT ON TABLE vodacom_packages IS 'Available data, voice, and SMS packages';
+COMMENT ON TABLE vodacom_transactions IS 'All customer transactions including purchases and payments';
+COMMENT ON COLUMN vodacom_transactions.channel IS 'Transaction channel/source';
+COMMENT ON TABLE vodacom_network_towers IS 'Network towers and base stations';
+COMMENT ON COLUMN vodacom_network_towers.capacity IS 'Maximum concurrent connections';
+COMMENT ON TABLE vodacom_network_issues IS 'Network outages and technical issues';
+COMMENT ON TABLE vodacom_customer_support IS 'Customer support tickets and service requests';
+COMMENT ON TABLE vodacom_sales IS 'Sales transactions for contracts and devices';
+COMMENT ON TABLE vodacom_vodapay_accounts IS 'VodaPay mobile wallet accounts';
+COMMENT ON TABLE vodacom_invoices IS 'Monthly invoices for postpaid customers';
 COMMENT ON TABLE vodacom_invoice_items IS 'Detailed line items for customer invoices';
 
+COMMIT;
+
 -- ============================================================================
--- INSERT SAMPLE DATA
+-- PHASE 3: INSERT SAMPLE DATA
 -- ============================================================================
 
 -- Insert Departments
@@ -592,11 +603,11 @@ INSERT ALL
   INTO vodacom_customers (account_number, first_name, last_name, id_number, email, phone, address_line1, city, province, postal_code, customer_type, credit_limit, assigned_agent_id, vodapay_active)
   VALUES ('VDC-ACC-100005', 'Nthabiseng', 'Mahlangu', '9505218765085', 'nthabiseng.mahlangu@email.com', '0827654321', '56 Market Street', 'Port Elizabeth', 'Eastern Cape', '6001', 'Individual', 6000, 3, 'Y')
   INTO vodacom_customers (account_number, first_name, last_name, id_number, email, phone, address_line1, city, province, postal_code, customer_type, credit_limit, assigned_agent_id, vodapay_active)
-  VALUES ('VDC-ACC-200001', 'ABC Trading PTY LTD', '', '2015/123456/07', 'accounts@abctrading.co.za', '0115551234', '100 Rivonia Road', 'Sandton', 'Gauteng', '2196', 'Business', 50000, 11, 'Y')
+  VALUES ('VDC-ACC-200001', 'ABC Trading PTY LTD', 'N/A', '2015/123456/07', 'accounts@abctrading.co.za', '0115551234', '100 Rivonia Road', 'Sandton', 'Gauteng', '2196', 'Business', 50000, 11, 'Y')
   INTO vodacom_customers (account_number, first_name, last_name, id_number, email, phone, address_line1, city, province, postal_code, customer_type, credit_limit, assigned_agent_id, vodapay_active)
-  VALUES ('VDC-ACC-200002', 'Tech Solutions SA', '', '2018/987654/07', 'info@techsolutions.co.za', '0215552345', '45 Adderley Street', 'Cape Town', 'Western Cape', '8001', 'Business', 75000, 12, 'Y')
+  VALUES ('VDC-ACC-200002', 'Tech Solutions SA', 'N/A', '2018/987654/07', 'info@techsolutions.co.za', '0215552345', '45 Adderley Street', 'Cape Town', 'Western Cape', '8001', 'Business', 75000, 12, 'Y')
   INTO vodacom_customers (account_number, first_name, last_name, id_number, email, phone, address_line1, city, province, postal_code, customer_type, credit_limit, assigned_agent_id, vodapay_active)
-  VALUES ('VDC-ACC-200003', 'Retail Group Limited', '', '2010/456789/07', 'contact@retailgroup.co.za', '0315553456', '88 West Street', 'Durban', 'KwaZulu-Natal', '4001', 'Business', 100000, 13, 'N')
+  VALUES ('VDC-ACC-200003', 'Retail Group Limited', 'N/A', '2010/456789/07', 'contact@retailgroup.co.za', '0315553456', '88 West Street', 'Durban', 'KwaZulu-Natal', '4001', 'Business', 100000, 13, 'N')
   INTO vodacom_customers (account_number, first_name, last_name, id_number, email, phone, address_line1, city, province, postal_code, customer_type, credit_limit, assigned_agent_id, vodapay_active)
   VALUES ('VDC-ACC-100006', 'Zanele', 'Sithole', '8812094567082', 'zanele.sithole@email.com', '0789012345', '34 Main Road', 'Bloemfontein', 'Free State', '9301', 'Individual', 3500, 4, 'N')
   INTO vodacom_customers (account_number, first_name, last_name, id_number, email, phone, address_line1, city, province, postal_code, customer_type, credit_limit, assigned_agent_id, vodapay_active)
@@ -608,13 +619,13 @@ INSERT ALL
   INTO vodacom_customers (account_number, first_name, last_name, id_number, email, phone, address_line1, city, province, postal_code, customer_type, credit_limit, assigned_agent_id, vodapay_active)
   VALUES ('VDC-ACC-100010', 'Khethiwe', 'Mthembu', '9306192345086', 'khethiwe.mthembu@email.com', '0756781234', '45 Nelson Mandela Drive', 'Nelspruit', 'Mpumalanga', '1200', 'Individual', 5500, 4, 'Y')
   INTO vodacom_customers (account_number, first_name, last_name, id_number, email, phone, address_line1, city, province, postal_code, customer_type, credit_limit, assigned_agent_id, vodapay_active)
-  VALUES ('VDC-ACC-300001', 'Government Department X', '', 'GOV-2020-001', 'procurement@govdeptx.gov.za', '0125551234', 'Government Buildings', 'Pretoria', 'Gauteng', '0001', 'Government', 500000, 11, 'N')
+  VALUES ('VDC-ACC-300001', 'Government Department X', 'N/A', 'GOV-2020-001', 'procurement@govdeptx.gov.za', '0125551234', 'Government Buildings', 'Pretoria', 'Gauteng', '0001', 'Government', 500000, 11, 'N')
   INTO vodacom_customers (account_number, first_name, last_name, id_number, email, phone, address_line1, city, province, postal_code, customer_type, credit_limit, assigned_agent_id, vodapay_active)
   VALUES ('VDC-ACC-100011', 'Sizwe', 'Cele', '8109143456088', 'sizwe.cele@email.com', '0789011111', '23 Victoria Street', 'Pietermaritzburg', 'KwaZulu-Natal', '3201', 'Individual', 4000, 5, 'Y')
   INTO vodacom_customers (account_number, first_name, last_name, id_number, email, phone, address_line1, city, province, postal_code, customer_type, credit_limit, assigned_agent_id, vodapay_active)
   VALUES ('VDC-ACC-100012', 'Thandeka', 'Mbatha', '9207245678084', 'thandeka.mbatha@email.com', '0821112222', '78 Commissioner Street', 'Johannesburg', 'Gauteng', '2001', 'Individual', 7000, 2, 'Y')
   INTO vodacom_customers (account_number, first_name, last_name, id_number, email, phone, address_line1, city, province, postal_code, customer_type, credit_limit, assigned_agent_id, vodapay_active)
-  VALUES ('VDC-ACC-200004', 'Construction Corp', '', '2012/234567/07', 'admin@constructioncorp.co.za', '0215554567', '150 Loop Street', 'Cape Town', 'Western Cape', '8001', 'Business', 60000, 12, 'Y')
+  VALUES ('VDC-ACC-200004', 'Construction Corp', 'N/A', '2012/234567/07', 'admin@constructioncorp.co.za', '0215554567', '150 Loop Street', 'Cape Town', 'Western Cape', '8001', 'Business', 60000, 12, 'Y')
   INTO vodacom_customers (account_number, first_name, last_name, id_number, email, phone, address_line1, city, province, postal_code, customer_type, credit_limit, assigned_agent_id, vodapay_active)
   VALUES ('VDC-ACC-100013', 'Mpho', 'Vilakazi', '8605196789085', 'mpho.vilakazi@email.com', '0733334444', '56 Church Square', 'Pretoria', 'Gauteng', '0002', 'Individual', 3500, 3, 'N')
   INTO vodacom_customers (account_number, first_name, last_name, id_number, email, phone, address_line1, city, province, postal_code, customer_type, credit_limit, assigned_agent_id, vodapay_active)
