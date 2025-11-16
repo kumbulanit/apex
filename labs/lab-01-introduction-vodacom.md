@@ -36,32 +36,189 @@ You are a new developer at Vodacom, tasked with creating a modern customer manag
 **Steps:**
 
 1. **Access APEX Instance**
+   
+   📸 **Visual Guide:**
    - Open your web browser (Chrome, Firefox, or Edge recommended)
    - Navigate to: `https://apex.oracle.com` (or your local APEX instance URL)
-   - Click "Sign In" in the top right corner
+   - You will see the Oracle APEX homepage
+   
+   **What You'll See:**
+   ```
+   ┌─────────────────────────────────────────────────────────┐
+   │  Oracle APEX                      [Get Started] [Sign In]│
+   │                                                          │
+   │  Build Enterprise Apps                                  │
+   │  ━━━━━━━━━━━━━━━━━                                      │
+   │  Low-Code Development Platform                          │
+   └─────────────────────────────────────────────────────────┘
+   ```
+   
+   - Click the blue **"Sign In"** button in the top right corner
+   
+   🔗 **Reference Screenshot:** See [APEX Login Page](https://docs.oracle.com/en/database/oracle/apex/23.1/htmdb/img/sign_in.png)
 
 2. **Log In to Your Workspace**
-   - Workspace: `VODACOM_DEV`
-   - Username: Your assigned username (e.g., `developer01`)
-   - Password: Your assigned password
-   - Click "Sign In"
+   
+   📸 **Visual Guide:**
+   
+   **What You'll See - Login Form:**
+   ```
+   ┌─────────────────────────────────────┐
+   │   🔷 Oracle Application Express     │
+   │                                     │
+   │   Workspace: [____________]         │
+   │   Username:  [____________]         │
+   │   Password:  [____________]         │
+   │   Remember workspace               │
+   │                                     │
+   │        [Sign In]                   │
+   └─────────────────────────────────────┘
+   ```
+   
+   **Step-by-Step:**
+   - ① In the **Workspace** field, type: `VODACOM_DEV`
+     - ⚠️ Note: This is case-sensitive!
+   - ② In the **Username** field, type your assigned username (e.g., `developer01`)
+   - ③ In the **Password** field, type your assigned password
+   - ④ Optional: Check "Remember workspace" to save the workspace name
+   - ⑤ Click the blue **"Sign In"** button
+   
+   🔗 **Reference Screenshot:** See [Workspace Sign In](https://docs.oracle.com/en/database/oracle/apex/23.1/htmdb/img/workspace_signin.png)
 
 3. **Explore the Home Dashboard**
-   - Observe the main sections:
-     - **App Builder**: Create and manage applications
-     - **SQL Workshop**: Database development tools
-     - **Team Development**: Project management
-     - **Gallery**: Pre-built application templates
-   - Note the workspace name in the top right corner
-   - Click on your username dropdown to see profile options
+   
+   📸 **Visual Guide - APEX Home Page:**
+   
+   **What You'll See After Login:**
+   ```
+   ┌─────────────────────────────────────────────────────────────────┐
+   │ 🔷 Oracle APEX    VODACOM_DEV                    developer01 ▾  │
+   ├─────────────────────────────────────────────────────────────────┤
+   │                                                                  │
+   │  Welcome to Application Express                                 │
+   │                                                                  │
+   │  ┌───────────────┐  ┌───────────────┐  ┌──────────────────┐   │
+   │  │ 📱 App Builder│  │ 🔧 SQL Workshop│  │ 👥 Team Development│  │
+   │  │               │  │                │  │                  │   │
+   │  │ Create and    │  │ Database       │  │ Track projects   │   │
+   │  │ manage apps   │  │ development    │  │ and milestones  │   │
+   │  └───────────────┘  └───────────────┘  └──────────────────┘   │
+   │                                                                  │
+   │  ┌───────────────┐  ┌───────────────┐  ┌──────────────────┐   │
+   │  │ 🎨 Gallery    │  │ 📦 Packaged   │  │ 📚 Documentation│   │
+   │  │               │  │    Apps        │  │                  │   │
+   │  │ Sample apps   │  │ Ready-to-use  │  │ Help & guides   │   │
+   │  │ and templates │  │ applications   │  │                  │   │
+   │  └───────────────┘  └───────────────┘  └──────────────────┘   │
+   └─────────────────────────────────────────────────────────────────┘
+   ```
+   
+   **Step-by-Step Exploration:**
+   
+   - ① **Observe the top navigation bar:**
+     - Left side: Oracle APEX logo (click to return home)
+     - Center: Workspace name `VODACOM_DEV` (you're in the right place!)
+     - Right side: Your username `developer01` with dropdown arrow ▾
+   
+   - ② **Identify the six main sections** (tiles/cards):
+     
+     📱 **App Builder** (Top Left)
+     - Purpose: Create and manage applications
+     - Color: Blue icon
+     - This is where you'll build your apps!
+     
+     🔧 **SQL Workshop** (Top Center)
+     - Purpose: Database development tools
+     - Color: Orange/Red icon
+     - This is where you'll create tables and run SQL
+     
+     👥 **Team Development** (Top Right)
+     - Purpose: Project management and tracking
+     - Color: Purple icon
+     - Track bugs, features, and milestones
+     
+     🎨 **Gallery** (Bottom Left)
+     - Purpose: Pre-built sample applications
+     - Color: Green icon
+     - Learn from example apps
+     
+     📦 **Packaged Apps** (Bottom Center)
+     - Purpose: Production-ready applications
+     - Color: Blue icon
+     - Install complete applications
+     
+     📚 **Documentation** (Bottom Right)
+     - Purpose: Help and learning resources
+     - Access guides and tutorials
+   
+   - ③ **Check your workspace indicator:**
+     - Look at the top center of the page
+     - You should see: `VODACOM_DEV`
+     - ✅ This confirms you're in the correct workspace
+   
+   - ④ **Explore your user menu:**
+     - Click on your username (`developer01 ▾`) in the top right
+     - You'll see a dropdown with options:
+       - Set Preferences
+       - Edit My Profile
+       - Feedback
+       - Sign Out
+     - Click elsewhere to close the dropdown
+   
+   🔗 **Reference Screenshots:** 
+   - [APEX Home Page](https://docs.oracle.com/en/database/oracle/apex/23.1/htmdb/img/apex_home.png)
+   - [Navigation Overview](https://docs.oracle.com/en/database/oracle/apex/23.1/htmdb/understanding-app-builder.html)
 
 4. **Check Workspace Information**
-   - Click the **⚙️ icon** (Settings) in the top right
-   - Select "About Application Express"
-   - Record the following:
-     - APEX Version: ____________________
-     - Database Version: ____________________
-     - Instance Type: ____________________
+   
+   📸 **Visual Guide:**
+   
+   **Step-by-Step:**
+   
+   - ① **Locate the Settings icon:**
+     - Look at the top-right corner of the page
+     - You'll see: `[VODACOM_DEV] [developer01 ▾] [⚙️ Settings]`
+     - The ⚙️ is a gear/cog icon
+   
+   - ② **Open Settings menu:**
+     - Click the **⚙️ icon** (gear icon)
+     - A dropdown menu appears with options:
+       ```
+       ┌─────────────────────────────┐
+       │ ⚙️ Settings               │
+       ├─────────────────────────────┤
+       │ Manage Workspace         │
+       │ SQL Workshop Preferences │
+       │ About Application Express│  ← Click this
+       └─────────────────────────────┘
+       ```
+   
+   - ③ **Click "About Application Express":**
+     - A modal dialog will appear
+   
+   - ④ **View and Record Version Information:**
+     ```
+     ┌──────────────────────────────────────────┐
+     │ About Oracle Application Express         │
+     ├──────────────────────────────────────────┤
+     │                                          │
+     │ Version: 23.1.0                          │
+     │ Database: Oracle Database 19c            │
+     │ Instance: apex.oracle.com                │
+     │                                          │
+     │           [Close]                        │
+     └──────────────────────────────────────────┘
+     ```
+   
+   - ⑤ **Record the following information in your lab notes:**
+     - APEX Version: ___23.1.0___ (or your version)
+     - Database Version: ___Oracle Database 19c___ (or your version)
+     - Instance Type: ___apex.oracle.com___ (or your instance)
+   
+   - ⑥ **Close the dialog:**
+     - Click the **"Close"** button or click outside the dialog
+   
+   🔗 **Reference:** [About APEX Dialog](https://docs.oracle.com/en/database/oracle/apex/23.1/htmdb/getting-started.html)
 
 **Expected Results:**
 - ✅ Successfully logged into VODACOM_DEV workspace
