@@ -1,0 +1,16 @@
+STORE_ID	STORE_NAME	PROVINCE	CITY	ADDRESS	POSTAL_CODE	MANAGER_NAME	PHONE	EMAIL	OPENING_DATE	STATUS
+1	Vodacom Sandton City	Gauteng	Sandton	Sandton City Shopping Centre	2196	Thabo Nkosi	0821234567	sandton@vodacom.co.za	2015-03-15	Active
+2	Vodacom V&A Waterfront	Western Cape	Cape Town	Victoria Wharf Shopping Centre	8001	Lerato Dlamini	0827654321	vawaterfront@vodacom.co.za	2014-06-20	Active
+3	Vodacom Gateway Durban	KwaZulu-Natal	Durban	Gateway Theatre of Shopping	4319	Sipho Radebe	0823456789	gateway@vodacom.co.za	2016-01-10	Active
+4	Vodacom Menlyn Park	Gauteng	Pretoria	Menlyn Park Shopping Centre	0181	Nomsa Khumalo	0829876543	menlyn@vodacom.co.za	2015-08-22	Active
+5	Vodacom Canal Walk	Western Cape	Cape Town	Canal Walk Shopping Centre	7441	Bongani Sithole	0826543210	canalwalk@vodacom.co.za	2017-02-14	Active
+6	Vodacom Pavilion	KwaZulu-Natal	Durban	The Pavilion Shopping Centre	3629	Zanele Mthethwa	0824567890	pavilion@vodacom.co.za	2016-09-05	Active
+7	Vodacom Mall of Africa	Gauteng	Midrand	Mall of Africa	1685	Mandla Zulu	0828765432	mallafrica@vodacom.co.za	2018-04-01	Active
+8	Vodacom Rosebank Mall	Gauteng	Johannesburg	Rosebank Mall	2196	Palesa Mokoena	0825678901	rosebank@vodacom.co.za	2014-11-30	Active
+9	Vodacom Centurion Mall	Gauteng	Centurion	Centurion Mall	0157	Thulani Ngubane	0827890123	centurion@vodacom.co.za	2017-07-18	Active
+10	Vodacom Tyger Valley	Western Cape	Cape Town	Tyger Valley Shopping Centre	7530	Mbali Dube	0823210987	tygervalley@vodacom.co.za	2015-12-10	Active
+11	Vodacom Eastgate	Gauteng	Johannesburg	Eastgate Shopping Centre	2090	Kagiso Mabaso	0826789012	eastgate@vodacom.co.za	2016-05-25	Active
+12	Vodacom Cresta	Gauteng	Johannesburg	Cresta Shopping Centre	2194	Lindiwe Shabalala	0829012345	cresta@vodacom.co.za	2015-09-08	Active
+13	Vodacom Ushaka Marine	KwaZulu-Natal	Durban	Ushaka Marine World	4001	Nhlanhla Cele	0824321098	ushaka@vodacom.co.za	2017-03-20	Active
+14	Vodacom Brooklyn Mall	Gauteng	Pretoria	Brooklyn Mall	0181	Thandiwe Madonsela	0828901234	brooklyn@vodacom.co.za	2016-10-12	Active
+15	Vodacom Woodmead	Gauteng	Johannesburg	Woodmead Retail Park	2191	Sello Maloka	0825432109	woodmead@vodacom.co.za	2018-01-15	Active

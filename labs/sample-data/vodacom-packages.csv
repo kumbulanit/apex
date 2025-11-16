@@ -1,0 +1,26 @@
+PACKAGE_ID,PACKAGE_NAME,PACKAGE_TYPE,DATA_MB,VOICE_MINUTES,SMS_COUNT,PRICE_RAND,VALIDITY_DAYS,DESCRIPTION,ACTIVE
+1,Daily 50MB,Data Only,50,0,0,10,1,Quick data boost for emergencies,Y
+2,Daily 250MB,Data Only,250,0,0,25,1,Basic daily browsing and social media,Y
+3,Daily 500MB,Data Only,500,0,0,40,1,Extended daily data for streaming,Y
+4,Weekly 1GB,Data Only,1024,0,0,75,7,Weekly data bundle for regular users,Y
+5,Weekly 2GB,Data Only,2048,0,0,130,7,Weekly bundle for moderate streaming,Y
+6,Monthly 5GB,Data Only,5120,0,0,499,30,Monthly data for heavy users,Y
+7,Monthly 10GB,Data Only,10240,0,0,899,30,Premium monthly data bundle,Y
+8,Monthly 20GB,Data Only,20480,0,0,1599,30,Ultimate data for power users,Y
+9,Red 1GB,Contract,1024,100,100,399,30,Entry level contract package,Y
+10,Red 2GB,Contract,2048,200,200,599,30,Standard contract package,Y
+11,Red 5GB,Contract,5120,300,300,899,30,Premium contract package,Y
+12,Red 10GB,Contract,10240,500,500,1299,30,Ultimate contract package,Y
+13,Night Owl 5GB,Data Only,5120,0,0,199,30,Night surfing 12am-5am only,Y
+14,Weekend Special 2GB,Data Only,2048,0,0,99,7,Weekend only data bundle,Y
+15,Video Streaming 3GB,Data Only,3072,0,0,299,30,Optimized for video streaming,Y
+16,Social Media 1GB,Data Only,1024,0,0,149,30,Facebook WhatsApp Twitter Instagram,Y
+17,Voice Bundle 60min,Voice Only,0,60,0,50,30,Pure voice minutes,Y
+18,Voice Bundle 120min,Voice Only,0,120,0,90,30,Extended voice minutes,Y
+19,SMS Bundle 100,SMS Only,0,0,100,20,30,Text message bundle,Y
+20,SMS Bundle 500,SMS Only,0,0,500,75,30,Extended SMS bundle,Y
+21,Combo Lite,Combo,512,50,50,199,30,Balanced data voice and SMS,Y
+22,Combo Standard,Combo,1024,100,100,349,30,Standard combo for all needs,Y
+23,Combo Premium,Combo,2048,200,200,599,30,Premium combo package,Y
+24,Business Starter,Combo,5120,500,200,1299,30,Small business package,Y
+25,Business Pro,Combo,10240,1000,500,2199,30,Professional business package,Y

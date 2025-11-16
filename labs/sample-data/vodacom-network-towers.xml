@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vodacom_network_towers>
+    <tower>
+        <tower_id>1</tower_id>
+        <tower_name>Sandton City Tower</tower_name>
+        <province>Gauteng</province>
+        <city>Sandton</city>
+        <latitude>-26.107730</latitude>
+        <longitude>28.056305</longitude>
+        <technology>5G</technology>
+        <status>Active</status>
+        <capacity_users>5000</capacity_users>
+        <installed_date>2020-08-15</installed_date>
+        <monthly_cost_rand>125000</monthly_cost_rand>
+        <ownership>Vodacom-owned</ownership>
+    </tower>
+    <tower>
+        <tower_id>2</tower_id>
+        <tower_name>V&amp;A Waterfront Tower</tower_name>
+        <province>Western Cape</province>
+        <city>Cape Town</city>
+        <latitude>-33.904500</latitude>
+        <longitude>18.419180</longitude>
+        <technology>5G</technology>
+        <status>Active</status>
+        <capacity_users>4500</capacity_users>
+        <installed_date>2020-11-20</installed_date>
+        <monthly_cost_rand>118000</monthly_cost_rand>
+        <ownership>Vodacom-owned</ownership>
+    </tower>
+    <tower>
+        <tower_id>3</tower_id>
+        <tower_name>Umhlanga Rocks Tower</tower_name>
+        <province>KwaZulu-Natal</province>
+        <city>Durban</city>
+        <latitude>-29.729550</latitude>
+        <longitude>31.082300</longitude>
+        <technology>5G</technology>
+        <status>Active</status>
+        <capacity_users>4000</capacity_users>
+        <installed_date>2021-02-10</installed_date>
+        <monthly_cost_rand>110000</monthly_cost_rand>
+        <ownership>Leased</ownership>
+    </tower>
+    <tower>
+        <tower_id>4</tower_id>
+        <tower_name>Pretoria CBD Tower</tower_name>
+        <province>Gauteng</province>
+        <city>Pretoria</city>
+        <latitude>-25.746111</latitude>
+        <longitude>28.188056</longitude>
+        <technology>4G</technology>
+        <status>Active</status>
+        <capacity_users>3500</capacity_users>
+        <installed_date>2018-06-22</installed_date>
+        <monthly_cost_rand>85000</monthly_cost_rand>
+        <ownership>Vodacom-owned</ownership>
+    </tower>
+    <tower>
+        <tower_id>5</tower_id>
+        <tower_name>Johannesburg CBD Tower</tower_name>
+        <province>Gauteng</province>
+        <city>Johannesburg</city>
+        <latitude>-26.204444</latitude>
+        <longitude>28.045556</longitude>
+        <technology>4G</technology>
+        <status>Active</status>
+        <capacity_users>4000</capacity_users>
+        <installed_date>2017-09-10</installed_date>
+        <monthly_cost_rand>90000</monthly_cost_rand>
+        <ownership>Vodacom-owned</ownership>
+    </tower>
+    <tower>
+        <tower_id>6</tower_id>
+        <tower_name>Cape Town CBD Tower</tower_name>
+        <province>Western Cape</province>
+        <city>Cape Town</city>
+        <latitude>-33.925278</latitude>
+        <longitude>18.423889</longitude>
+        <technology>4G</technology>
+        <status>Active</status>
+        <capacity_users>3800</capacity_users>
+        <installed_date>2017-11-05</installed_date>
+        <monthly_cost_rand>88000</monthly_cost_rand>
+        <ownership>Shared</ownership>
+    </tower>
+    <tower>
+        <tower_id>7</tower_id>
+        <tower_name>Durban CBD Tower</tower_name>
+        <province>KwaZulu-Natal</province>
+        <city>Durban</city>
+        <latitude>-29.858611</latitude>
+        <longitude>31.021944</longitude>
+        <technology>4G</technology>
+        <status>Active</status>
+        <capacity_users>3600</capacity_users>
+        <installed_date>2018-03-18</installed_date>
+        <monthly_cost_rand>86000</monthly_cost_rand>
+        <ownership>Vodacom-owned</ownership>
+    </tower>
+    <tower>
+        <tower_id>8</tower_id>
+        <tower_name>Midrand Business Park</tower_name>
+        <province>Gauteng</province>
+        <city>Midrand</city>
+        <latitude>-25.995556</latitude>
+        <longitude>28.125833</longitude>
+        <technology>5G</technology>
+        <status>Active</status>
+        <capacity_users>4200</capacity_users>
+        <installed_date>2021-06-30</installed_date>
+        <monthly_cost_rand>115000</monthly_cost_rand>
+        <ownership>Vodacom-owned</ownership>
+    </tower>
+    <tower>
+        <tower_id>9</tower_id>
+        <tower_name>Rosebank Tower</tower_name>
+        <province>Gauteng</province>
+        <city>Johannesburg</city>
+        <latitude>-26.145833</latitude>
+        <longitude>28.041667</longitude>
+        <technology>Hybrid</technology>
+        <status>Maintenance</status>
+        <capacity_users>3200</capacity_users>
+        <installed_date>2019-04-12</installed_date>
+        <monthly_cost_rand>92000</monthly_cost_rand>
+        <ownership>Leased</ownership>
+    </tower>
+    <tower>
+        <tower_id>10</tower_id>
+        <tower_name>Stellenbosch University</tower_name>
+        <province>Western Cape</province>
+        <city>Stellenbosch</city>
+        <latitude>-33.932778</latitude>
+        <longitude>18.864444</longitude>
+        <technology>4G</technology>
+        <status>Active</status>
+        <capacity_users>3000</capacity_users>
+        <installed_date>2019-08-20</installed_date>
+        <monthly_cost_rand>78000</monthly_cost_rand>
+        <ownership>Shared</ownership>
+    </tower>
+</vodacom_network_towers>
