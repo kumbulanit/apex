@@ -938,7 +938,13 @@ SELECT * FROM dual;
 
 COMMIT;
 
--- Sample output message
+-- ============================================================================
+-- DATA VALIDATION AND VERIFICATION
+-- ============================================================================
+-- This block validates that all tables have been populated with data
+-- and provides detailed reporting on any missing data
+-- ============================================================================
+
 DECLARE
     v_table_count NUMBER;
     v_dept_count NUMBER;
@@ -948,43 +954,290 @@ DECLARE
     v_pkg_count NUMBER;
     v_trans_count NUMBER;
     v_tower_count NUMBER;
+    v_issue_count NUMBER;
     v_ticket_count NUMBER;
     v_sale_count NUMBER;
     v_vodapay_count NUMBER;
     v_invoice_count NUMBER;
+    v_invoice_item_count NUMBER;
+    v_errors NUMBER := 0;
+    v_warnings NUMBER := 0;
+    
+    -- Expected minimum counts for each table
+    v_expected_dept CONSTANT NUMBER := 8;
+    v_expected_emp CONSTANT NUMBER := 29;
+    v_expected_cust CONSTANT NUMBER := 22;
+    v_expected_number CONSTANT NUMBER := 15;
+    v_expected_pkg CONSTANT NUMBER := 21;
+    v_expected_trans CONSTANT NUMBER := 15;
+    v_expected_tower CONSTANT NUMBER := 12;
+    v_expected_issue CONSTANT NUMBER := 5;
+    v_expected_ticket CONSTANT NUMBER := 10;
+    v_expected_sale CONSTANT NUMBER := 10;
+    v_expected_vodapay CONSTANT NUMBER := 9;
+    v_expected_invoice CONSTANT NUMBER := 6;
+    v_expected_item CONSTANT NUMBER := 17;
+    
 BEGIN
+    DBMS_OUTPUT.PUT_LINE('========================================');
+    DBMS_OUTPUT.PUT_LINE('VODACOM DATABASE VALIDATION REPORT');
+    DBMS_OUTPUT.PUT_LINE('========================================');
+    DBMS_OUTPUT.PUT_LINE('Generated: ' || TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI:SS'));
+    DBMS_OUTPUT.PUT_LINE('');
+    
+    -- Count tables
     SELECT COUNT(*) INTO v_table_count FROM user_tables WHERE table_name LIKE 'VODACOM_%';
+    DBMS_OUTPUT.PUT_LINE('Tables created: ' || v_table_count || ' of 13');
+    
+    IF v_table_count < 13 THEN
+        DBMS_OUTPUT.PUT_LINE('❌ ERROR: Missing tables! Expected 13, found ' || v_table_count);
+        v_errors := v_errors + 1;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('✓ All tables created successfully');
+    END IF;
+    
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('DATA POPULATION VALIDATION:');
+    DBMS_OUTPUT.PUT_LINE('========================================');
+    
+    -- Check each table
+    -- 1. Departments
     SELECT COUNT(*) INTO v_dept_count FROM vodacom_departments;
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('1. vodacom_departments:');
+    IF v_dept_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('   ❌ CRITICAL: No data found! Expected ' || v_expected_dept || ' records');
+        v_errors := v_errors + 1;
+    ELSIF v_dept_count < v_expected_dept THEN
+        DBMS_OUTPUT.PUT_LINE('   ⚠ WARNING: Only ' || v_dept_count || ' records. Expected ' || v_expected_dept);
+        v_warnings := v_warnings + 1;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('   ✓ ' || v_dept_count || ' records populated');
+    END IF;
+    
+    -- 2. Employees
     SELECT COUNT(*) INTO v_emp_count FROM vodacom_employees;
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('2. vodacom_employees:');
+    IF v_emp_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('   ❌ CRITICAL: No data found! Expected ' || v_expected_emp || ' records');
+        v_errors := v_errors + 1;
+    ELSIF v_emp_count < v_expected_emp THEN
+        DBMS_OUTPUT.PUT_LINE('   ⚠ WARNING: Only ' || v_emp_count || ' records. Expected ' || v_expected_emp);
+        v_warnings := v_warnings + 1;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('   ✓ ' || v_emp_count || ' records populated');
+    END IF;
+    
+    -- 3. Customers
     SELECT COUNT(*) INTO v_cust_count FROM vodacom_customers;
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('3. vodacom_customers:');
+    IF v_cust_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('   ❌ CRITICAL: No data found! Expected ' || v_expected_cust || ' records');
+        v_errors := v_errors + 1;
+    ELSIF v_cust_count < v_expected_cust THEN
+        DBMS_OUTPUT.PUT_LINE('   ⚠ WARNING: Only ' || v_cust_count || ' records. Expected ' || v_expected_cust);
+        v_warnings := v_warnings + 1;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('   ✓ ' || v_cust_count || ' records populated');
+    END IF;
+    
+    -- 4. Mobile Numbers
     SELECT COUNT(*) INTO v_number_count FROM vodacom_mobile_numbers;
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('4. vodacom_mobile_numbers:');
+    IF v_number_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('   ❌ CRITICAL: No data found! Expected ' || v_expected_number || ' records');
+        v_errors := v_errors + 1;
+    ELSIF v_number_count < v_expected_number THEN
+        DBMS_OUTPUT.PUT_LINE('   ⚠ WARNING: Only ' || v_number_count || ' records. Expected ' || v_expected_number);
+        v_warnings := v_warnings + 1;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('   ✓ ' || v_number_count || ' records populated');
+    END IF;
+    
+    -- 5. Packages
     SELECT COUNT(*) INTO v_pkg_count FROM vodacom_packages;
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('5. vodacom_packages:');
+    IF v_pkg_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('   ❌ CRITICAL: No data found! Expected ' || v_expected_pkg || ' records');
+        v_errors := v_errors + 1;
+    ELSIF v_pkg_count < v_expected_pkg THEN
+        DBMS_OUTPUT.PUT_LINE('   ⚠ WARNING: Only ' || v_pkg_count || ' records. Expected ' || v_expected_pkg);
+        v_warnings := v_warnings + 1;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('   ✓ ' || v_pkg_count || ' records populated');
+    END IF;
+    
+    -- 6. Transactions
     SELECT COUNT(*) INTO v_trans_count FROM vodacom_transactions;
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('6. vodacom_transactions:');
+    IF v_trans_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('   ❌ CRITICAL: No data found! Expected ' || v_expected_trans || ' records');
+        v_errors := v_errors + 1;
+    ELSIF v_trans_count < v_expected_trans THEN
+        DBMS_OUTPUT.PUT_LINE('   ⚠ WARNING: Only ' || v_trans_count || ' records. Expected ' || v_expected_trans);
+        v_warnings := v_warnings + 1;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('   ✓ ' || v_trans_count || ' records populated');
+    END IF;
+    
+    -- 7. Network Towers
     SELECT COUNT(*) INTO v_tower_count FROM vodacom_network_towers;
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('7. vodacom_network_towers:');
+    IF v_tower_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('   ❌ CRITICAL: No data found! Expected ' || v_expected_tower || ' records');
+        v_errors := v_errors + 1;
+    ELSIF v_tower_count < v_expected_tower THEN
+        DBMS_OUTPUT.PUT_LINE('   ⚠ WARNING: Only ' || v_tower_count || ' records. Expected ' || v_expected_tower);
+        v_warnings := v_warnings + 1;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('   ✓ ' || v_tower_count || ' records populated');
+    END IF;
+    
+    -- 8. Network Issues
+    SELECT COUNT(*) INTO v_issue_count FROM vodacom_network_issues;
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('8. vodacom_network_issues:');
+    IF v_issue_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('   ❌ CRITICAL: No data found! Expected ' || v_expected_issue || ' records');
+        v_errors := v_errors + 1;
+    ELSIF v_issue_count < v_expected_issue THEN
+        DBMS_OUTPUT.PUT_LINE('   ⚠ WARNING: Only ' || v_issue_count || ' records. Expected ' || v_expected_issue);
+        v_warnings := v_warnings + 1;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('   ✓ ' || v_issue_count || ' records populated');
+    END IF;
+    
+    -- 9. Customer Support
     SELECT COUNT(*) INTO v_ticket_count FROM vodacom_customer_support;
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('9. vodacom_customer_support:');
+    IF v_ticket_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('   ❌ CRITICAL: No data found! Expected ' || v_expected_ticket || ' records');
+        v_errors := v_errors + 1;
+    ELSIF v_ticket_count < v_expected_ticket THEN
+        DBMS_OUTPUT.PUT_LINE('   ⚠ WARNING: Only ' || v_ticket_count || ' records. Expected ' || v_expected_ticket);
+        v_warnings := v_warnings + 1;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('   ✓ ' || v_ticket_count || ' records populated');
+    END IF;
+    
+    -- 10. Sales
     SELECT COUNT(*) INTO v_sale_count FROM vodacom_sales;
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('10. vodacom_sales:');
+    IF v_sale_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('   ❌ CRITICAL: No data found! Expected ' || v_expected_sale || ' records');
+        v_errors := v_errors + 1;
+    ELSIF v_sale_count < v_expected_sale THEN
+        DBMS_OUTPUT.PUT_LINE('   ⚠ WARNING: Only ' || v_sale_count || ' records. Expected ' || v_expected_sale);
+        v_warnings := v_warnings + 1;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('   ✓ ' || v_sale_count || ' records populated');
+    END IF;
+    
+    -- 11. VodaPay Accounts
     SELECT COUNT(*) INTO v_vodapay_count FROM vodacom_vodapay_accounts;
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('11. vodacom_vodapay_accounts:');
+    IF v_vodapay_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('   ❌ CRITICAL: No data found! Expected ' || v_expected_vodapay || ' records');
+        v_errors := v_errors + 1;
+    ELSIF v_vodapay_count < v_expected_vodapay THEN
+        DBMS_OUTPUT.PUT_LINE('   ⚠ WARNING: Only ' || v_vodapay_count || ' records. Expected ' || v_expected_vodapay);
+        v_warnings := v_warnings + 1;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('   ✓ ' || v_vodapay_count || ' records populated');
+    END IF;
+    
+    -- 12. Invoices
     SELECT COUNT(*) INTO v_invoice_count FROM vodacom_invoices;
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('12. vodacom_invoices:');
+    IF v_invoice_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('   ❌ CRITICAL: No data found! Expected ' || v_expected_invoice || ' records');
+        v_errors := v_errors + 1;
+    ELSIF v_invoice_count < v_expected_invoice THEN
+        DBMS_OUTPUT.PUT_LINE('   ⚠ WARNING: Only ' || v_invoice_count || ' records. Expected ' || v_expected_invoice);
+        v_warnings := v_warnings + 1;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('   ✓ ' || v_invoice_count || ' records populated');
+    END IF;
+    
+    -- 13. Invoice Items
+    SELECT COUNT(*) INTO v_invoice_item_count FROM vodacom_invoice_items;
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('13. vodacom_invoice_items:');
+    IF v_invoice_item_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('   ❌ CRITICAL: No data found! Expected ' || v_expected_item || ' records');
+        v_errors := v_errors + 1;
+    ELSIF v_invoice_item_count < v_expected_item THEN
+        DBMS_OUTPUT.PUT_LINE('   ⚠ WARNING: Only ' || v_invoice_item_count || ' records. Expected ' || v_expected_item);
+        v_warnings := v_warnings + 1;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('   ✓ ' || v_invoice_item_count || ' records populated');
+    END IF;
+    
+    -- Summary report
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('========================================');
+    DBMS_OUTPUT.PUT_LINE('VALIDATION SUMMARY:');
+    DBMS_OUTPUT.PUT_LINE('========================================');
+    DBMS_OUTPUT.PUT_LINE('Total Tables: ' || v_table_count);
+    DBMS_OUTPUT.PUT_LINE('Total Records: ' || (v_dept_count + v_emp_count + v_cust_count + 
+                         v_number_count + v_pkg_count + v_trans_count + v_tower_count + 
+                         v_issue_count + v_ticket_count + v_sale_count + v_vodapay_count + 
+                         v_invoice_count + v_invoice_item_count));
+    DBMS_OUTPUT.PUT_LINE('Errors: ' || v_errors);
+    DBMS_OUTPUT.PUT_LINE('Warnings: ' || v_warnings);
+    DBMS_OUTPUT.PUT_LINE('');
+    
+    -- Final status
+    IF v_errors > 0 THEN
+        DBMS_OUTPUT.PUT_LINE('❌ STATUS: FAILED - ' || v_errors || ' critical error(s) found');
+        DBMS_OUTPUT.PUT_LINE('');
+        DBMS_OUTPUT.PUT_LINE('TROUBLESHOOTING STEPS:');
+        DBMS_OUTPUT.PUT_LINE('1. Check if you ran this script in SQL Scripts (not SQL Commands)');
+        DBMS_OUTPUT.PUT_LINE('2. Review the script execution log for errors');
+        DBMS_OUTPUT.PUT_LINE('3. Verify all INSERT statements completed successfully');
+        DBMS_OUTPUT.PUT_LINE('4. Check for constraint violations or foreign key errors');
+        DBMS_OUTPUT.PUT_LINE('5. Ensure COMMIT statements were executed');
+        DBMS_OUTPUT.PUT_LINE('');
+        DBMS_OUTPUT.PUT_LINE('To verify individual tables, run:');
+        DBMS_OUTPUT.PUT_LINE('  SELECT COUNT(*) FROM vodacom_departments;');
+        DBMS_OUTPUT.PUT_LINE('  SELECT COUNT(*) FROM vodacom_employees;');
+        DBMS_OUTPUT.PUT_LINE('  (etc. for each table)');
+        RAISE_APPLICATION_ERROR(-20001, 'Data validation failed! Check output above for details.');
+    ELSIF v_warnings > 0 THEN
+        DBMS_OUTPUT.PUT_LINE('⚠ STATUS: COMPLETED WITH WARNINGS - ' || v_warnings || ' warning(s)');
+        DBMS_OUTPUT.PUT_LINE('Some tables have fewer records than expected.');
+        DBMS_OUTPUT.PUT_LINE('The database is functional but may have incomplete data.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('✓ STATUS: SUCCESS - All tables populated correctly!');
+        DBMS_OUTPUT.PUT_LINE('');
+        DBMS_OUTPUT.PUT_LINE('You can now proceed with Lab exercises!');
+        DBMS_OUTPUT.PUT_LINE('');
+        DBMS_OUTPUT.PUT_LINE('Quick verification queries:');
+        DBMS_OUTPUT.PUT_LINE('  SELECT * FROM vodacom_departments;');
+        DBMS_OUTPUT.PUT_LINE('  SELECT * FROM vodacom_employees WHERE ROWNUM <= 10;');
+        DBMS_OUTPUT.PUT_LINE('  SELECT * FROM vodacom_customers WHERE ROWNUM <= 10;');
+    END IF;
     
     DBMS_OUTPUT.PUT_LINE('========================================');
-    DBMS_OUTPUT.PUT_LINE('Vodacom Database Setup Complete!');
-    DBMS_OUTPUT.PUT_LINE('========================================');
-    DBMS_OUTPUT.PUT_LINE('Tables created: ' || v_table_count);
-    DBMS_OUTPUT.PUT_LINE('');
-    DBMS_OUTPUT.PUT_LINE('Sample Data Summary:');
-    DBMS_OUTPUT.PUT_LINE('  Departments: ' || v_dept_count);
-    DBMS_OUTPUT.PUT_LINE('  Employees: ' || v_emp_count);
-    DBMS_OUTPUT.PUT_LINE('  Customers: ' || v_cust_count);
-    DBMS_OUTPUT.PUT_LINE('  Mobile Numbers: ' || v_number_count);
-    DBMS_OUTPUT.PUT_LINE('  Packages: ' || v_pkg_count);
-    DBMS_OUTPUT.PUT_LINE('  Transactions: ' || v_trans_count);
-    DBMS_OUTPUT.PUT_LINE('  Network Towers: ' || v_tower_count);
-    DBMS_OUTPUT.PUT_LINE('  Support Tickets: ' || v_ticket_count);
-    DBMS_OUTPUT.PUT_LINE('  Sales Records: ' || v_sale_count);
-    DBMS_OUTPUT.PUT_LINE('  VodaPay Accounts: ' || v_vodapay_count);
-    DBMS_OUTPUT.PUT_LINE('  Invoices: ' || v_invoice_count);
-    DBMS_OUTPUT.PUT_LINE('========================================');
-    DBMS_OUTPUT.PUT_LINE('You can now proceed with Lab exercises!');
-    DBMS_OUTPUT.PUT_LINE('========================================');
+    
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('');
+        DBMS_OUTPUT.PUT_LINE('❌ VALIDATION ERROR: ' || SQLERRM);
+        DBMS_OUTPUT.PUT_LINE('Error Code: ' || SQLCODE);
+        DBMS_OUTPUT.PUT_LINE('');
+        DBMS_OUTPUT.PUT_LINE('This usually means one or more tables were not created properly.');
+        DBMS_OUTPUT.PUT_LINE('Please re-run the entire script from the beginning.');
+        RAISE;
 END;
 /
