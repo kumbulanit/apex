@@ -24,14 +24,15 @@ The materials are designed for beginner-level students with no prior APEX experi
 ```
 /apex/
 ├── labs/                          # Hands-on lab exercises
-│   ├── setup-sample-data.sql     # Complete database setup script
-│   ├── lab-01-introduction.md    # Lab 01: Introduction (60 min) ✅
-│   ├── lab-02-creating-applications.md  # Lab 02: Creating Apps (90 min) ✅
-│   ├── lab-03-pages-and-page-designer.md  # Lab 03: Page Designer (120 min) ✅
-│   ├── lab-04-reports-and-forms.md   # Lab 04: Reports & Forms (90 min) ✅
-│   ├── lab-05-controls-and-navigation.md  # Lab 05: Controls (90 min) ✅
-│   ├── lab-06-security-and-performance.md # Lab 06: Security (120 min) ✅
-│   └── lab-07-deploying-applications.md      # Lab 07: Deployment (90 min) ✅
+│   ├── vodacom-simple-setup.sql  # 🎯 PRIMARY DATABASE SETUP (USE THIS!)
+│   ├── drop-vodacom-simple.sql   # Drop script (if errors occur)
+│   ├── lab-01-introduction-vodacom.md      # Lab 01: Introduction (60 min) ✅
+│   ├── lab-02-creating-applications-vodacom.md  # Lab 02: Creating Apps (90 min) ✅
+│   ├── lab-03-pages-and-page-designer-vodacom.md  # Lab 03: Page Designer (120 min) ✅
+│   ├── lab-04-reports-and-forms-vodacom.md   # Lab 04: Reports & Forms (90 min) ✅
+│   ├── lab-05-controls-and-navigation-vodacom.md  # Lab 05: Controls (90 min) ✅
+│   ├── lab-06-security-and-performance-vodacom.md # Lab 06: Security (120 min) ✅
+│   └── lab-07-deploying-applications-vodacom.md   # Lab 07: Deployment (90 min) ✅
 ├── assessments/                   # Knowledge assessments
 │   ├── assessment-01.md          # Assessment 01 (100 points)
 │   ├── assessment-02.md          # Assessment 02 (100 points)
@@ -51,12 +52,19 @@ The materials are designed for beginner-level students with no prior APEX experi
 └── slides/                        # PowerPoint slide content (TO BE CREATED)
 ```
 
+**📌 Note:** Lab files ending with `-vodacom.md` use the Vodacom Simple database (vodacom-simple-setup.sql). 
+Alternative versions without `-vodacom` suffix use the TechNova database and are provided for reference only.
+
 ---
 
 ## 🎯 Lab Exercises Summary
 
 ### Lab 01: Introduction and Getting Started (60 minutes)
+
+**File:** `lab-01-introduction-vodacom.md`  
 **Prerequisites:** None  
+**Database:** Vodacom Simple (vodacom-simple-setup.sql)
+
 **Objectives:**
 - Navigate APEX development environment
 - Use SQL Workshop tools
@@ -71,16 +79,19 @@ The materials are designed for beginner-level students with no prior APEX experi
 - Referential integrity
 - Basic PL/SQL
 
-**Database Objects Created:**
-- DEPARTMENTS table (4 records)
-- EMPLOYEES table (4 records)
-- V_EMPLOYEE_DETAILS view
-- 3 indexes on EMPLOYEES
+**Database Objects Used:**
+- VODACOM_CUSTOMERS table
+- VODACOM_PACKAGES table
+- VODACOM_SUBSCRIPTIONS table
 
 ---
 
 ### Lab 02: Creating Applications (90 minutes)
+
+**File:** `lab-02-creating-applications-vodacom.md`  
 **Prerequisites:** Completed Lab 01  
+**Database:** Vodacom Simple (vodacom-simple-setup.sql)
+
 **Objectives:**
 - Create applications using the wizard
 - Import data from spreadsheets
@@ -96,20 +107,24 @@ The materials are designed for beginner-level students with no prior APEX experi
 - Blueprint customization
 
 **Applications Created:**
-- Employee Management System (5 pages)
-- Client Management (spreadsheet import)
-- Project Tracker (custom SQL)
-- Sample Database App (blueprint)
+- Customer Management Portal (vodacom_customers)
+- Package Management (vodacom_packages)
+- Subscription Tracker (vodacom_subscriptions)
+- Support Ticket System (vodacom_support_tickets)
 
 **Time Savings Demonstrated:** 99% vs. traditional development
 
 ---
 
 ### Lab 03: Pages and Page Designer (120 minutes)
+
+**File:** `lab-03-pages-and-page-designer-vodacom.md`  
 **Prerequisites:** Completed Lab 02  
+**Database:** Vodacom Simple (vodacom-simple-setup.sql)
+
 **Objectives:**
 - Master three-panel Page Designer interface
-- Create Project Dashboard with KPI cards
+- Create Contract Dashboard with KPI cards
 - Build Interactive Grid with inline editing
 - Add chart regions for data visualization
 - Implement Dynamic Actions for interactivity
@@ -124,24 +139,28 @@ The materials are designed for beginner-level students with no prior APEX experi
 - Modal dialog creation
 
 **Components Built:**
-- Project Dashboard with 4 KPIs
-- Interactive Grid for project management
-- Donut chart for project status
-- Bar chart for budget analysis
+- Contract Dashboard with KPIs
+- Interactive Grid for customer contracts
+- Donut chart for contract status
+- Bar chart for revenue analysis
 - 3 Dynamic Actions
 - Quick-add modal dialog
 
 ---
 
 ### Lab 04: Reports and Forms (90 minutes)
+
+**File:** `lab-04-reports-and-forms-vodacom.md`  
 **Prerequisites:** Completed Lab 03  
+**Database:** Vodacom Simple (vodacom-simple-setup.sql)
+
 **Objectives:**
 - Create advanced Interactive Reports with filtering
 - Build Interactive Grids for bulk editing
 - Implement master-detail forms
 - Add conditional highlighting
 - Configure download options (CSV, PDF, Excel)
-- Create invoice management system
+- Create transaction management system
 
 **Key Skills:**
 - Interactive Report customization
@@ -152,18 +171,22 @@ The materials are designed for beginner-level students with no prior APEX experi
 - Popup LOVs and cascading selects
 
 **Applications Created:**
-- Client Analysis Report (page 20)
-- Timesheet Entry Grid (page 25)
-- Invoice Master-Detail (pages 29-30)
-- Complete invoice line items system
+- Customer Analysis Report (vodacom_customers)
+- Transaction Entry Grid (vodacom_transactions)
+- Support Ticket Master-Detail (vodacom_support_tickets)
+- Complete transaction management system
 
 ---
 
 ### Lab 05: Controls and Navigation (90 minutes)
+
+**File:** `lab-05-controls-and-navigation-vodacom.md`  
 **Prerequisites:** Completed Lab 04  
+**Database:** Vodacom Simple (vodacom-simple-setup.sql)
+
 **Objectives:**
 - Configure hierarchical navigation menus
-- Implement cascading LOVs (Country → State → City)
+- Implement cascading LOVs (Package → Contract Type)
 - Use different item types effectively
 - Build advanced search interfaces
 - Create breadcrumb navigation
@@ -179,15 +202,19 @@ The materials are designed for beginner-level students with no prior APEX experi
 
 **Features Implemented:**
 - Multi-level navigation menu
-- Address entry with cascading LOVs
-- Team assignment with Shuttle control
-- Advanced project search (page 37)
+- Package selection with cascading LOVs
+- Customer assignment interface
+- Advanced contract search
 - Breadcrumb trails
 
 ---
 
 ### Lab 06: Security and Performance (120 minutes)
+
+**File:** `lab-06-security-and-performance-vodacom.md`  
 **Prerequisites:** Completed Lab 05  
+**Database:** Vodacom Simple (vodacom-simple-setup.sql)
+
 **Objectives:**
 - Configure authentication and authorization schemes
 - Implement row-level security with VPD
@@ -197,7 +224,7 @@ The materials are designed for beginner-level students with no prior APEX experi
 - Use APEX Advisor for best practices
 
 **Key Skills:**
-- Authorization schemes (Admin, Manager, Employee)
+- Authorization schemes (Admin, Manager, Agent)
 - Session state protection
 - Virtual Private Database (VPD) policies
 - Input validation and escaping
@@ -207,7 +234,7 @@ The materials are designed for beginner-level students with no prior APEX experi
 
 **Security Features:**
 - Role-based access control
-- Row-level security on timesheets
+- Row-level security on transactions
 - Audit log with triggers
 - SQL injection prevention
 - XSS protection
@@ -216,7 +243,11 @@ The materials are designed for beginner-level students with no prior APEX experi
 ---
 
 ### Lab 07: Deploying Applications (90 minutes)
+
+**File:** `lab-07-deploying-applications-vodacom.md`  
 **Prerequisites:** Completed Lab 06  
+**Database:** Vodacom Simple (vodacom-simple-setup.sql)
+
 **Objectives:**
 - Export and import APEX applications
 - Manage supporting objects and data
@@ -307,12 +338,59 @@ Each assessment includes:
 
 ## 🗄️ Sample Database
 
-### Setup Script: `setup-sample-data.sql`
+### 🎯 RECOMMENDED SETUP: `vodacom-simple-setup.sql`
+
+**✅ QUICK START - USE THIS SCRIPT FIRST!**
+
+This is the simplified Vodacom database for training exercises. It creates 10 tables with realistic mobile network data.
+
+**What It Creates:**
+- 10 Vodacom-specific tables with relationships
+- 10 records per table (100 total records)
+- Customers with South African ID numbers
+- Mobile packages (prepaid, contract, data)
+- Subscriptions and transactions
+- Support tickets
+- Contract management (types, renewals, penalties, benefits)
+
+**Key Features:**
+- Simple structure - easy to understand
+- Realistic Vodacom business data
+- Proper foreign key relationships
+- Sample data ready for APEX applications
+- Includes sequences for new records
+
+**Usage:**
+1. Log into APEX workspace
+2. SQL Workshop > SQL Scripts
+3. Upload `vodacom-simple-setup.sql`
+4. Click Run
+5. Verify completion (should show "VODACOM DATABASE SETUP COMPLETE!")
+
+**Database Size:**
+- Tables: 10
+- Records: 100 (10 per table)
+- Sequences: 10
+- Ready for immediate use in labs
+
+**Troubleshooting:**
+If you get errors (table already exists, constraint violations, etc.):
+1. Upload and run `drop-vodacom-simple.sql` first
+2. Then run `vodacom-simple-setup.sql` again
+3. All errors should be resolved
+
+---
+
+### Alternative Setup: `setup-sample-data.sql`
+
+**⚠️ ADVANCED OPTION - Only if instructed**
+
+This is the comprehensive TechNova Corp database (used in some lessons).
 
 **What It Creates:**
 - 13 database tables with relationships
 - 7 departments
-- 50 employees (sample)
+- 50 employees
 - 20 clients
 - 30 projects with tasks
 - Timesheet records
@@ -417,13 +495,13 @@ Each assessment includes:
 ### Completion Checklist
 
 **Labs:**
-- [x] Lab 01: Introduction (60 min) ✅ CREATED
-- [x] Lab 02: Creating Applications (90 min) ✅ CREATED
-- [x] Lab 03: Pages and Page Designer (120 min) ✅ CREATED
-- [x] Lab 04: Reports and Forms (90 min) ✅ CREATED
-- [x] Lab 05: Controls and Navigation (90 min) ✅ CREATED
-- [x] Lab 06: Security and Performance (120 min) ✅ CREATED
-- [x] Lab 07: Deploying Applications (90 min) ✅ CREATED
+- [x] Lab 01: Introduction (60 min) ✅ CREATED - `lab-01-introduction-vodacom.md`
+- [x] Lab 02: Creating Applications (90 min) ✅ CREATED - `lab-02-creating-applications-vodacom.md`
+- [x] Lab 03: Pages and Page Designer (120 min) ✅ CREATED - `lab-03-pages-and-page-designer-vodacom.md`
+- [x] Lab 04: Reports and Forms (90 min) ✅ CREATED - `lab-04-reports-and-forms-vodacom.md`
+- [x] Lab 05: Controls and Navigation (90 min) ✅ CREATED - `lab-05-controls-and-navigation-vodacom.md`
+- [x] Lab 06: Security and Performance (120 min) ✅ CREATED - `lab-06-security-and-performance-vodacom.md`
+- [x] Lab 07: Deploying Applications (90 min) ✅ CREATED - `lab-07-deploying-applications-vodacom.md`
 
 **Assessments:**
 - [ ] Assessment 01 (30 min) ✅ CREATED
@@ -444,7 +522,9 @@ Each assessment includes:
 - [ ] Lab 07 Solutions
 
 **Database:**
-- [ ] Sample Data SQL Script ✅ CREATED (13 tables, 100+ records)
+- [x] Vodacom Simple Setup ✅ CREATED (vodacom-simple-setup.sql - 10 tables, 100 records)
+- [x] Vodacom Drop Script ✅ CREATED (drop-vodacom-simple.sql)
+- [ ] TechNova Sample Data ✅ REFERENCE ONLY (setup-sample-data.sql - 13 tables, 100+ records)
 
 **Total Progress:** 12/24 items complete (50%) - **ALL LABS COMPLETE!**
 

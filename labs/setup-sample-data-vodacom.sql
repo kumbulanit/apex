@@ -35,18 +35,169 @@
 -- ============================================================================
 -- CLEANUP: Drop existing objects (if re-running script)
 -- ============================================================================
+-- This ensures a clean slate by dropping all Vodacom tables before recreation
 BEGIN
-    -- Drop tables in reverse dependency order
-    FOR rec IN (SELECT table_name FROM user_tables WHERE table_name LIKE 'VODACOM_%' ORDER BY table_name DESC) LOOP
-        BEGIN
-            EXECUTE IMMEDIATE 'DROP TABLE ' || rec.table_name || ' CASCADE CONSTRAINTS';
-            DBMS_OUTPUT.PUT_LINE('Dropped table: ' || rec.table_name);
-        EXCEPTION
-            WHEN OTHERS THEN
-                DBMS_OUTPUT.PUT_LINE('Could not drop ' || rec.table_name || ': ' || SQLERRM);
-        END;
-    END LOOP;
-    DBMS_OUTPUT.PUT_LINE('Cleanup complete.');
+    DBMS_OUTPUT.PUT_LINE('========================================');
+    DBMS_OUTPUT.PUT_LINE('CLEANING UP EXISTING VODACOM TABLES');
+    DBMS_OUTPUT.PUT_LINE('========================================');
+    
+    -- Drop tables in reverse dependency order to avoid FK constraint errors
+    -- Drop child tables first, then parent tables
+    
+    -- Drop invoice_items (child of invoices)
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE vodacom_invoice_items CASCADE CONSTRAINTS PURGE';
+        DBMS_OUTPUT.PUT_LINE('✓ Dropped table: vodacom_invoice_items');
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN -- -942 = table does not exist
+                DBMS_OUTPUT.PUT_LINE('  Warning: ' || SQLERRM);
+            END IF;
+    END;
+    
+    -- Drop invoices (references customers, employees)
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE vodacom_invoices CASCADE CONSTRAINTS PURGE';
+        DBMS_OUTPUT.PUT_LINE('✓ Dropped table: vodacom_invoices');
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN
+                DBMS_OUTPUT.PUT_LINE('  Warning: ' || SQLERRM);
+            END IF;
+    END;
+    
+    -- Drop vodapay_accounts (references customers)
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE vodacom_vodapay_accounts CASCADE CONSTRAINTS PURGE';
+        DBMS_OUTPUT.PUT_LINE('✓ Dropped table: vodacom_vodapay_accounts');
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN
+                DBMS_OUTPUT.PUT_LINE('  Warning: ' || SQLERRM);
+            END IF;
+    END;
+    
+    -- Drop sales (references customers, employees)
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE vodacom_sales CASCADE CONSTRAINTS PURGE';
+        DBMS_OUTPUT.PUT_LINE('✓ Dropped table: vodacom_sales');
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN
+                DBMS_OUTPUT.PUT_LINE('  Warning: ' || SQLERRM);
+            END IF;
+    END;
+    
+    -- Drop customer_support (references customers, employees)
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE vodacom_customer_support CASCADE CONSTRAINTS PURGE';
+        DBMS_OUTPUT.PUT_LINE('✓ Dropped table: vodacom_customer_support');
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN
+                DBMS_OUTPUT.PUT_LINE('  Warning: ' || SQLERRM);
+            END IF;
+    END;
+    
+    -- Drop network_issues (references towers, employees)
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE vodacom_network_issues CASCADE CONSTRAINTS PURGE';
+        DBMS_OUTPUT.PUT_LINE('✓ Dropped table: vodacom_network_issues');
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN
+                DBMS_OUTPUT.PUT_LINE('  Warning: ' || SQLERRM);
+            END IF;
+    END;
+    
+    -- Drop network_towers (standalone)
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE vodacom_network_towers CASCADE CONSTRAINTS PURGE';
+        DBMS_OUTPUT.PUT_LINE('✓ Dropped table: vodacom_network_towers');
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN
+                DBMS_OUTPUT.PUT_LINE('  Warning: ' || SQLERRM);
+            END IF;
+    END;
+    
+    -- Drop transactions (references customers, packages, employees)
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE vodacom_transactions CASCADE CONSTRAINTS PURGE';
+        DBMS_OUTPUT.PUT_LINE('✓ Dropped table: vodacom_transactions');
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN
+                DBMS_OUTPUT.PUT_LINE('  Warning: ' || SQLERRM);
+            END IF;
+    END;
+    
+    -- Drop packages (standalone)
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE vodacom_packages CASCADE CONSTRAINTS PURGE';
+        DBMS_OUTPUT.PUT_LINE('✓ Dropped table: vodacom_packages');
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN
+                DBMS_OUTPUT.PUT_LINE('  Warning: ' || SQLERRM);
+            END IF;
+    END;
+    
+    -- Drop mobile_numbers (references customers)
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE vodacom_mobile_numbers CASCADE CONSTRAINTS PURGE';
+        DBMS_OUTPUT.PUT_LINE('✓ Dropped table: vodacom_mobile_numbers');
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN
+                DBMS_OUTPUT.PUT_LINE('  Warning: ' || SQLERRM);
+            END IF;
+    END;
+    
+    -- Drop customers (references employees)
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE vodacom_customers CASCADE CONSTRAINTS PURGE';
+        DBMS_OUTPUT.PUT_LINE('✓ Dropped table: vodacom_customers');
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN
+                DBMS_OUTPUT.PUT_LINE('  Warning: ' || SQLERRM);
+            END IF;
+    END;
+    
+    -- Drop employees (references departments, self-referencing)
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE vodacom_employees CASCADE CONSTRAINTS PURGE';
+        DBMS_OUTPUT.PUT_LINE('✓ Dropped table: vodacom_employees');
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN
+                DBMS_OUTPUT.PUT_LINE('  Warning: ' || SQLERRM);
+            END IF;
+    END;
+    
+    -- Drop departments (references employees - circular reference)
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE vodacom_departments CASCADE CONSTRAINTS PURGE';
+        DBMS_OUTPUT.PUT_LINE('✓ Dropped table: vodacom_departments');
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN
+                DBMS_OUTPUT.PUT_LINE('  Warning: ' || SQLERRM);
+            END IF;
+    END;
+    
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('✓ Cleanup complete - All Vodacom tables dropped');
+    DBMS_OUTPUT.PUT_LINE('========================================');
+    DBMS_OUTPUT.PUT_LINE('');
+    
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('');
+        DBMS_OUTPUT.PUT_LINE('❌ ERROR during cleanup: ' || SQLERRM);
+        DBMS_OUTPUT.PUT_LINE('Continuing with table creation...');
+        DBMS_OUTPUT.PUT_LINE('');
 END;
 /
 
