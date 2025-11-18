@@ -289,18 +289,22 @@ Let's improve the dashboard with Vodacom-specific metrics.
 8. **Add Revenue Summary Region**
    - Create another region
    - Name: `Today's Activity`
-   - Type: **Static Content**
-   - Template: **Hero**
-   - Under **Source**, add SQL Query (Type: SQL Query):
+   - Type: **Classic Report**
+   - Template: **Standard**
+   - Under **Source**:
+     - Type: **PL/SQL Function Body**
+     - PL/SQL Function Body:
    
    ```sql
-   SELECT 
-       TO_CHAR(COUNT(*), '999,999') || ' transactions' AS transactions_today,
-       'R' || TO_CHAR(SUM(amount), '999,999,999.99') AS revenue_today,
-       TO_CHAR(COUNT(DISTINCT customer_id), '999,999') || ' customers served' AS customers_today
-   FROM vodacom_transactions
-   WHERE TRUNC(transaction_date) = TRUNC(SYSDATE)
-     AND status = 'Completed';
+   BEGIN
+       RETURN 'SELECT 
+           TO_CHAR(COUNT(*), ''999,999'') || '' transactions'' AS transactions_today,
+           ''R'' || TO_CHAR(SUM(amount), ''999,999,999.99'') AS revenue_today,
+           TO_CHAR(COUNT(DISTINCT customer_id), ''999,999'') || '' customers served'' AS customers_today
+       FROM vodacom_transactions
+       WHERE TRUNC(transaction_date) = TRUNC(SYSDATE)
+         AND status = ''Completed''';
+   END;
    ```
 
 9. **Save and Run**

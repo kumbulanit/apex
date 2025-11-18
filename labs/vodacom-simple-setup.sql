@@ -483,6 +483,7 @@ CREATE TABLE vodacom_transactions (
     transaction_type  VARCHAR2(50),
     amount            NUMBER(10,2) NOT NULL,
     payment_method    VARCHAR2(50),
+    status            VARCHAR2(20) DEFAULT 'Completed',
     description       VARCHAR2(200),
     processed_by      NUMBER,
     CONSTRAINT fk_trans_customer FOREIGN KEY (customer_id) REFERENCES vodacom_customers(customer_id),
@@ -493,16 +494,16 @@ CREATE TABLE vodacom_transactions (
 CREATE SEQUENCE vodacom_transactions_seq START WITH 1;
 
 -- Insert 10 transactions
-INSERT INTO vodacom_transactions VALUES (1, 'TXN-2024-001', 1, 1, DATE '2024-01-01', 'Recharge', 99.00, 'Cash', 'Smart S package purchase', 2);
-INSERT INTO vodacom_transactions VALUES (2, 'TXN-2024-002', 2, 5, DATE '2024-01-01', 'Subscription', 199.00, 'Debit Order', 'Red Plan 199 monthly payment', 8);
-INSERT INTO vodacom_transactions VALUES (3, 'TXN-2024-003', 3, 3, DATE '2024-01-05', 'Recharge', 299.00, 'Card', 'Smart L package purchase', 2);
-INSERT INTO vodacom_transactions VALUES (4, 'TXN-2024-004', 4, 6, DATE '2024-01-10', 'Subscription', 299.00, 'Debit Order', 'Red Plan 299 monthly payment', 8);
-INSERT INTO vodacom_transactions VALUES (5, 'TXN-2024-005', 5, 2, DATE '2024-01-15', 'Recharge', 149.00, 'EFT', 'Smart M package purchase', 3);
-INSERT INTO vodacom_transactions VALUES (6, 'TXN-2024-006', 6, 7, DATE '2024-01-20', 'Subscription', 499.00, 'Debit Order', 'Red Plan 499 monthly payment', 8);
-INSERT INTO vodacom_transactions VALUES (7, 'TXN-2024-007', 7, 4, DATE '2024-01-25', 'Recharge', 499.00, 'Cash', 'Smart XL package purchase', 2);
-INSERT INTO vodacom_transactions VALUES (8, 'TXN-2024-008', 8, 9, DATE '2024-02-01', 'Data Purchase', 199.00, 'VodaPay', 'Data Only 5GB purchase', 3);
-INSERT INTO vodacom_transactions VALUES (9, 'TXN-2024-009', 9, 8, DATE '2024-02-05', 'Data Purchase', 49.00, 'Card', 'Data Only 1GB purchase', 2);
-INSERT INTO vodacom_transactions VALUES (10, 'TXN-2024-010', 10, 10, DATE '2024-02-10', 'Data Purchase', 99.00, 'Cash', 'Night Owl 10GB purchase', 3);
+INSERT INTO vodacom_transactions VALUES (1, 'TXN-2024-001', 1, 1, DATE '2024-01-01', 'Recharge', 99.00, 'Cash', 'Completed', 'Smart S package purchase', 2);
+INSERT INTO vodacom_transactions VALUES (2, 'TXN-2024-002', 2, 5, DATE '2024-01-01', 'Subscription', 199.00, 'Debit Order', 'Completed', 'Red Plan 199 monthly payment', 8);
+INSERT INTO vodacom_transactions VALUES (3, 'TXN-2024-003', 3, 3, DATE '2024-01-05', 'Recharge', 299.00, 'Card', 'Completed', 'Smart L package purchase', 2);
+INSERT INTO vodacom_transactions VALUES (4, 'TXN-2024-004', 4, 6, DATE '2024-01-10', 'Subscription', 299.00, 'Debit Order', 'Completed', 'Red Plan 299 monthly payment', 8);
+INSERT INTO vodacom_transactions VALUES (5, 'TXN-2024-005', 5, 2, DATE '2024-01-15', 'Recharge', 149.00, 'EFT', 'Completed', 'Smart M package purchase', 3);
+INSERT INTO vodacom_transactions VALUES (6, 'TXN-2024-006', 6, 7, DATE '2024-01-20', 'Subscription', 499.00, 'Debit Order', 'Completed', 'Red Plan 499 monthly payment', 8);
+INSERT INTO vodacom_transactions VALUES (7, 'TXN-2024-007', 7, 4, DATE '2024-01-25', 'Recharge', 499.00, 'Cash', 'Completed', 'Smart XL package purchase', 2);
+INSERT INTO vodacom_transactions VALUES (8, 'TXN-2024-008', 8, 9, DATE '2024-02-01', 'Data Purchase', 199.00, 'VodaPay', 'Completed', 'Data Only 5GB purchase', 3);
+INSERT INTO vodacom_transactions VALUES (9, 'TXN-2024-009', 9, 8, DATE '2024-02-05', 'Data Purchase', 49.00, 'Card', 'Pending', 'Data Only 1GB purchase', 2);
+INSERT INTO vodacom_transactions VALUES (10, 'TXN-2024-010', 10, 10, DATE '2024-02-10', 'Data Purchase', 99.00, 'Cash', 'Completed', 'Night Owl 10GB purchase', 3);
 
 COMMIT;
 
