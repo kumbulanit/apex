@@ -340,48 +340,90 @@ Each assessment includes:
 
 ### 🎯 RECOMMENDED SETUP: `vodacom-simple-setup.sql`
 
-**✅ QUICK START - USE THIS SCRIPT FIRST!**
+**✅ QUICK START - USE THIS SCRIPT FOR ALL LABS!**
 
-This is the simplified Vodacom database for training exercises. It creates 10 tables with realistic mobile network data.
+This is the complete Vodacom enterprise database for all training exercises. It contains ALL tables from `setup-sample-data-vodacom.sql` in a simplified format with 10 records per table.
 
 **What It Creates:**
-- 10 Vodacom-specific tables with relationships
-- 10 records per table (100 total records)
-- Customers with South African ID numbers
-- Mobile packages (prepaid, contract, data)
-- Subscriptions and transactions
-- Support tickets
-- Contract management (types, renewals, penalties, benefits)
+- **13 Core Enterprise Tables:**
+  1. VODACOM_DEPARTMENTS (HR, Finance, Sales, IT, etc.)
+  2. VODACOM_EMPLOYEES (Agents, managers, technicians)
+  3. VODACOM_CUSTOMERS (Full customer profiles with provinces, account types)
+  4. VODACOM_MOBILE_NUMBERS (SIM cards linked to customers)
+  5. VODACOM_PACKAGES (Prepaid, contract, data plans)
+  6. VODACOM_TRANSACTIONS (Purchases with package and employee references)
+  7. VODACOM_NETWORK_TOWERS (Cell towers across SA provinces)
+  8. VODACOM_NETWORK_ISSUES (Network outages and maintenance)
+  9. VODACOM_CUSTOMER_SUPPORT (Support tickets with agent assignments)
+  10. VODACOM_SALES (Device sales with commissions)
+  11. VODACOM_VODAPAY_ACCOUNTS (Mobile wallet accounts)
+  12. VODACOM_INVOICES (Monthly billing with tax calculations)
+  13. VODACOM_INVOICE_ITEMS (Line items for invoices)
+
+- **7 Contract Management Tables:**
+  14. VODACOM_SUBSCRIPTIONS (Active customer subscriptions)
+  15. VODACOM_SUPPORT_TICKETS (Legacy support system)
+  16. VODACOM_CONTRACT_TYPES (12-36 month contract options)
+  17. VODACOM_CUSTOMER_CONTRACTS (Customer contracts with devices)
+  18. VODACOM_CONTRACT_RENEWALS (Upgrade history)
+  19. VODACOM_CONTRACT_PENALTIES (Early termination fees, late payments)
+  20. VODACOM_CONTRACT_BENEFITS (Loyalty rewards, perks)
 
 **Key Features:**
-- Simple structure - easy to understand
-- Realistic Vodacom business data
-- Proper foreign key relationships
-- Sample data ready for APEX applications
-- Includes sequences for new records
+- **20 total tables** with complete referential integrity
+- **10 records per table** (200 total records) - perfect for training
+- **Real South African data** (provinces, ID numbers, mobile formats, R currency)
+- **Foreign key relationships** properly ordered (parent tables before children)
+- **Enterprise features:** Departments, employees, network infrastructure, invoicing, VodaPay
+- **Ready for all lab exercises** - Labs 1-7 fully compatible
 
 **Usage:**
 1. Log into APEX workspace
 2. SQL Workshop > SQL Scripts
 3. Upload `vodacom-simple-setup.sql`
-4. Click Run
-5. Verify completion (should show "VODACOM DATABASE SETUP COMPLETE!")
+4. Click Run (execution time: ~30 seconds)
+5. Verify completion (should show "VODACOM DATABASE SETUP COMPLETE! TOTAL: 20 TABLES WITH 200 SAMPLE RECORDS")
 
 **Database Size:**
-- Tables: 10
-- Records: 100 (10 per table)
-- Sequences: 10
-- Ready for immediate use in labs
+- **Tables:** 20 (13 core + 7 contract)
+- **Records:** 200 (10 per table)
+- **Sequences:** 20 (one per table)
+- **Foreign Keys:** 30+ relationships
+- **Ready for immediate use in all labs**
 
 **Troubleshooting:**
 If you get errors (table already exists, constraint violations, etc.):
 1. Upload and run `drop-vodacom-simple.sql` first
 2. Then run `vodacom-simple-setup.sql` again
 3. All errors should be resolved
+4. Script includes DROP TABLE statements at the beginning
 
 ---
 
-### Alternative Setup: `setup-sample-data.sql`
+### Alternative Reference: `setup-sample-data-vodacom.sql`
+
+**⚠️ REFERENCE ONLY - Not needed for labs**
+
+This is the comprehensive Vodacom database with 30+ records per table. It contains the same schema as `vodacom-simple-setup.sql` but with more data for production-like demonstrations.
+
+**What It Creates:**
+- Same 20 tables as vodacom-simple-setup.sql
+- 30+ records per table (vs. 10 in simplified version)
+- More employees, customers, transactions
+- Greater geographic coverage
+- More complex business scenarios
+
+**When to Use:**
+- Production demonstrations requiring larger datasets
+- Performance testing with more records
+- Advanced instructor demonstrations
+- **NOT required for lab exercises** (use vodacom-simple-setup.sql instead)
+
+**File Location:** `/Users/kumbulani/Desktop/apex/labs/setup-sample-data-vodacom.sql`
+
+---
+
+### Legacy Reference: `setup-sample-data.sql`
 
 **⚠️ ADVANCED OPTION - Only if instructed**
 
@@ -522,9 +564,10 @@ This is the comprehensive TechNova Corp database (used in some lessons).
 - [ ] Lab 07 Solutions
 
 **Database:**
-- [x] Vodacom Simple Setup ✅ CREATED (vodacom-simple-setup.sql - 10 tables, 100 records)
+- [x] Vodacom Simple Setup ✅ UPDATED (vodacom-simple-setup.sql - 20 tables, 200 records)
 - [x] Vodacom Drop Script ✅ CREATED (drop-vodacom-simple.sql)
-- [ ] TechNova Sample Data ✅ REFERENCE ONLY (setup-sample-data.sql - 13 tables, 100+ records)
+- [ ] Vodacom Full Data ✅ REFERENCE ONLY (setup-sample-data-vodacom.sql - 20 tables, 600+ records)
+- [ ] TechNova Sample Data ✅ LEGACY REFERENCE (setup-sample-data.sql - 13 tables, 100+ records)
 
 **Total Progress:** 12/24 items complete (50%) - **ALL LABS COMPLETE!**
 
