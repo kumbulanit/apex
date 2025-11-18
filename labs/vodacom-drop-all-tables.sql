@@ -2,42 +2,28 @@
 -- DROP ALL TABLES SCRIPT
 -- Oracle APEX Training Course
 -- ============================================================================
--- This script drops ALL tables in the schema:
+-- This script drops training tables in the schema:
 -- - Vodacom tables (13 tables)
 -- - TechNova tables (13 tables)
--- - EBA tables (all tables starting with EBA)
--- Use this to completely clean your workspace
+-- NOTE: EBA tables (Sample Apps) are NOT dropped
+-- Use this to clean your workspace for training
 --
--- ⚠️ WARNING: This will permanently delete ALL tables and data!
+-- ⚠️ WARNING: This will permanently delete Vodacom and TechNova tables and data!
 -- ============================================================================
 BEGIN
     DBMS_OUTPUT.PUT_LINE('========================================');
-    DBMS_OUTPUT.PUT_LINE('DROPPING ALL TABLES IN SCHEMA');
+    DBMS_OUTPUT.PUT_LINE('DROPPING TRAINING TABLES IN SCHEMA');
     DBMS_OUTPUT.PUT_LINE('========================================');
-    DBMS_OUTPUT.PUT_LINE('⚠️  WARNING: This will delete ALL data!');
+    DBMS_OUTPUT.PUT_LINE('⚠️  WARNING: This will delete training data!');
     DBMS_OUTPUT.PUT_LINE('');
     DBMS_OUTPUT.PUT_LINE('Tables to be dropped:');
     DBMS_OUTPUT.PUT_LINE('  - Vodacom tables (13)');
     DBMS_OUTPUT.PUT_LINE('  - TechNova tables (13)');
-    DBMS_OUTPUT.PUT_LINE('  - EBA tables (all)');
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('Tables NOT dropped:');
+    DBMS_OUTPUT.PUT_LINE('  - EBA tables (Sample Apps preserved)');
     DBMS_OUTPUT.PUT_LINE('========================================');
     DBMS_OUTPUT.PUT_LINE('');
-END;
-/
-
--- ============================================================================
--- Drop all EBA tables first (Sample Apps, Demo Apps, etc.)
--- ============================================================================
-BEGIN
-    FOR rec IN (SELECT table_name FROM user_tables WHERE table_name LIKE 'EBA%') LOOP
-        BEGIN
-            EXECUTE IMMEDIATE 'DROP TABLE ' || rec.table_name || ' CASCADE CONSTRAINTS PURGE';
-            DBMS_OUTPUT.PUT_LINE('✓ Dropped: ' || rec.table_name);
-        EXCEPTION
-            WHEN OTHERS THEN
-                DBMS_OUTPUT.PUT_LINE('✗ Error dropping ' || rec.table_name || ': ' || SQLERRM);
-        END;
-    END LOOP;
 END;
 /
 
