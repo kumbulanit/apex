@@ -48,9 +48,9 @@ Vodacom needs enterprise-grade security and performance:
      FROM vodacom_employees
      WHERE email = :APP_USER
        AND job_title IN ('IT Manager', 'System Administrator', 'Head of Operations')
-       AND department_id IN (SELECT department_id FROM vodacom_departments 
-                             WHERE department_name = 'IT')
-       AND is_active = 'Y'
+       AND dept_id IN (SELECT dept_id FROM vodacom_departments 
+                             WHERE dept_name = 'IT')
+       AND status = 'Active'
      ```
    - Error Message: `You do not have administrative privileges. Contact Vodacom IT support.`
    - Validate Authorization: `Once per Session`
@@ -66,7 +66,7 @@ Vodacom needs enterprise-grade security and performance:
        AND (job_title LIKE '%Manager%' 
             OR job_title LIKE '%Supervisor%'
             OR job_title IN ('IT Manager', 'System Administrator'))
-       AND is_active = 'Y'
+       AND status = 'Active'
      ```
    - Error Message: `This feature requires manager-level access.`
 
@@ -77,11 +77,11 @@ Vodacom needs enterprise-grade security and performance:
      SELECT 1
      FROM vodacom_employees
      WHERE email = :APP_USER
-       AND (department_id IN (SELECT department_id FROM vodacom_departments 
-                              WHERE department_name = 'Network Operations')
+       AND (dept_id IN (SELECT dept_id FROM vodacom_departments 
+                              WHERE dept_name = 'Network Operations')
             OR job_title LIKE '%Technician%'
             OR job_title LIKE '%Engineer%')
-       AND is_active = 'Y'
+       AND status = 'Active'
      ```
    - Error Message: `Network operations access required. Contact your manager.`
 
@@ -97,9 +97,9 @@ Vodacom needs enterprise-grade security and performance:
        INTO v_count
        FROM vodacom_employees
        WHERE email = :APP_USER
-         AND department_id IN (SELECT department_id FROM vodacom_departments 
-                               WHERE department_name IN ('Customer Service', 'Call Center'))
-         AND is_active = 'Y';
+         AND dept_id IN (SELECT dept_id FROM vodacom_departments 
+                               WHERE dept_name IN ('Customer Service', 'Call Center'))
+         AND status = 'Active';
        
        RETURN (v_count > 0);
      EXCEPTION
@@ -241,15 +241,15 @@ BEGIN
            CASE 
              WHEN e.job_title LIKE '%Manager%' OR e.job_title LIKE '%Supervisor%' THEN 'MANAGER'
              WHEN e.job_title LIKE '%Admin%' THEN 'ADMIN'
-             WHEN d.department_name = 'Network Operations' THEN 'NETWORK_OPS'
+             WHEN d.dept_name = 'Network Operations' THEN 'NETWORK_OPS'
              ELSE 'AGENT'
            END AS role,
-           d.department_name
+           d.dept_name AS department_name
     INTO v_emp_id, v_role, v_department
     FROM vodacom_employees e
-    JOIN vodacom_departments d ON e.department_id = d.department_id
+    JOIN vodacom_departments d ON e.dept_id = d.dept_id
     WHERE e.email = SYS_CONTEXT('APEX$SESSION', 'APP_USER')
-      AND e.is_active = 'Y';
+      AND e.status = 'Active';
   EXCEPTION
     WHEN NO_DATA_FOUND THEN
       RETURN '1=0'; -- No access if user not found
@@ -425,8 +425,9 @@ END;
             SUBSTR(new_values, 1, 100) AS new_values_preview
      FROM vodacom_audit_log
      WHERE changed_date >= TRUNC(SYSDATE) - 90 -- POPIA: 90-day retention
-     ORDER BY changed_date DESC
+     -- Sorting handled via Interactive Report attributes
      ```
+   - In the **POPIA Audit Log** region, go to **Attributes → Sort** and add `CHANGED_DATE` descending so the most recent entries stay on top without using `ORDER BY` in the SQL source.
 
 ---
 
