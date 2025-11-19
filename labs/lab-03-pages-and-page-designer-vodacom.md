@@ -238,16 +238,22 @@ You'll use Page Designer to build this complex operations page from scratch.
               ni.issue_ref,
               ni.issue_type,
               ni.severity,
+            CASE 
+              WHEN ni.severity = 'Critical' THEN 1
+              WHEN ni.severity = 'High' THEN 2
+              WHEN ni.severity = 'Medium' THEN 3
+              ELSE 4
+            END AS severity_rank,
               nt.tower_code,
               nt.tower_name,
               nt.province,
               nt.city,
               ni.affected_customers,
               TO_CHAR(ni.reported_date, 'YYYY-MM-DD HH24:MI') AS reported_date,
-              CASE 
+                CASE 
                   WHEN ni.status = 'Resolved' THEN ni.resolved_date
-                  ELSE NULL
-              END AS resolved_date,
+                  ELSE CAST(NULL AS TIMESTAMP)
+                END AS resolved_date,
               ni.status,
               e.first_name || ' ' || e.last_name AS assigned_technician,
               ni.description
@@ -255,14 +261,6 @@ You'll use Page Designer to build this complex operations page from scratch.
        LEFT JOIN vodacom_network_towers nt ON ni.tower_id = nt.tower_id
        LEFT JOIN vodacom_employees e ON ni.assigned_to = e.emp_id
        WHERE ni.status IN ('Open', 'Acknowledged', 'In Progress')
-       ORDER BY 
-           CASE ni.severity 
-               WHEN 'Critical' THEN 1
-               WHEN 'High' THEN 2
-               WHEN 'Medium' THEN 3
-               ELSE 4
-           END,
-           ni.reported_date DESC
        ```
    - Layout:
      - Sequence: `20`
@@ -302,6 +300,10 @@ You'll use Page Designer to build this complex operations page from scratch.
      - Type: `Select List`
      - List of Values:
        - Static: `Critical,Critical,High,High,Medium,Medium,Low,Low`
+   - **SEVERITY_RANK**:
+     - Type: `Hidden`
+     - Value Protected: `No`
+     - Used to control default sorting inside the grid
    - **TOWER_CODE**:
      - Heading: `Tower`
      - Type: `Text Field` (read-only for now)
@@ -318,7 +320,14 @@ You'll use Page Designer to build this complex operations page from scratch.
      - Format Mask: `999,999,999`
      - Alignment: `Right`
 
-4. **Add Save Button**
+4. **Configure Default Sorting**
+   - With the **Active Network Issues** region selected, go to **Attributes → Appearance → Reports → Primary Report**
+   - Under **Sort**, add two entries:
+     - `SEVERITY_RANK` ascending
+     - `REPORTED_DATE` descending
+   - This keeps the grid sorted without putting an `ORDER BY` in the SQL source
+
+5. **Add Save Button**
    - Right-click **Active Network Issues** region in left panel
    - Select **Create Button**
    - Identification:
