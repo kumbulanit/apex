@@ -49,6 +49,7 @@ Vodacom's customer service management team needs comprehensive reporting capabil
             COUNT(DISTINCT mn.mobile_number) AS total_numbers,
             COUNT(CASE WHEN mn.status = 'Active' THEN 1 END) AS active_numbers,
             SUM(mn.airtime_balance + mn.data_balance_mb * 0.15) AS total_balance,
+            COALESCE(SUM(mn.airtime_balance + mn.data_balance_mb * 0.15), 0) AS total_balance_sort,
             CASE WHEN c.vodapay_active = 'Y' THEN 'Yes' ELSE 'No' END AS vodapay_user,
             MAX(t.transaction_date) AS last_transaction_date,
             COUNT(cs.ticket_number) AS support_tickets
@@ -59,8 +60,9 @@ Vodacom's customer service management team needs comprehensive reporting capabil
      GROUP BY c.customer_id, c.account_number, c.first_name, c.last_name,
               c.phone, c.email, c.province, c.customer_type, 
               c.account_status, c.vodapay_active
-     ORDER BY total_balance DESC NULLS LAST
+     -- Sorting handled via Interactive Report attributes
      ```
+   - In Page Designer, hide the helper column **TOTAL_BALANCE_SORT** and configure **Attributes → Sort** to order by `TOTAL_BALANCE_SORT` (descending) followed by `LAST_TRANSACTION_DATE` (descending) so the report keeps the same priority without embedding an `ORDER BY` clause.
    - Click **Create Page**
 
 2. **Customize Report Columns**
@@ -220,7 +222,8 @@ Vodacom's customer service management team needs comprehensive reporting capabil
             c.account_status,
             COUNT(DISTINCT mn.mobile_number) AS total_numbers,
             COUNT(CASE WHEN mn.status = 'Active' THEN 1 END) AS active_numbers,
-            SUM(mn.airtime_balance + mn.data_balance_mb * 0.15) AS total_balance,
+           SUM(mn.airtime_balance + mn.data_balance_mb * 0.15) AS total_balance,
+           COALESCE(SUM(mn.airtime_balance + mn.data_balance_mb * 0.15), 0) AS total_balance_sort,
             CASE WHEN c.vodapay_active = 'Y' THEN 'Yes' ELSE 'No' END AS vodapay_user,
             MAX(t.transaction_date) AS last_transaction_date,
             COUNT(cs.ticket_number) AS support_tickets
@@ -240,9 +243,10 @@ Vodacom's customer service management team needs comprehensive reporting capabil
              SUM(mn.airtime_balance + mn.data_balance_mb * 0.15) >= :P20_MIN_BALANCE)
         AND (:P20_CUSTOMER_TYPE IS NULL OR 
              INSTR(':' || :P20_CUSTOMER_TYPE || ':', ':' || c.customer_type || ':') > 0)
-     ORDER BY total_balance DESC NULLS LAST
+     -- Sorting handled via Interactive Report attributes
      ```
    - Page Items to Submit: `P20_SEARCH_NAME,P20_SEARCH_PROVINCE,P20_CUSTOMER_TYPE,P20_VODAPAY_STATUS,P20_MIN_BALANCE`
+   - Reuse the **TOTAL_BALANCE_SORT** hidden column to order the filtered report (Attributes → Sort → `TOTAL_BALANCE_SORT` descending, then `LAST_TRANSACTION_DATE` descending). This mirrors the previous ordering without embedding `ORDER BY`.
 
 ---
 
@@ -260,7 +264,7 @@ Vodacom's customer service management team needs comprehensive reporting capabil
      SELECT t.transaction_id,
             c.account_number,
             c.first_name || ' ' || c.last_name AS customer_name,
-            vp.vodapay_account_number,
+            vp.wallet_number,
             t.transaction_date,
             t.transaction_type,
             t.amount,
@@ -275,7 +279,7 @@ Vodacom's customer service management team needs comprehensive reporting capabil
      LEFT JOIN vodacom_packages p ON t.package_id = p.package_id
      WHERE t.transaction_date >= TRUNC(SYSDATE) - 30
        AND t.transaction_type LIKE '%VodaPay%'
-     ORDER BY t.transaction_date DESC
+     -- Default sorting configured via Interactive Grid attributes
      ```
 
 2. **Configure Grid for Editing**
@@ -288,6 +292,7 @@ Vodacom's customer service management team needs comprehensive reporting capabil
      - Delete Row: `Yes`
      - Pagination → Type: `Page`
      - Pagination → Rows per Page: `50`
+   - Still in Attributes → **Sorting**, add `TRANSACTION_DATE` descending so the newest VodaPay entries appear first without using SQL `ORDER BY`.
 
 3. **Configure Columns**
    - **TRANSACTION_ID**:
@@ -351,7 +356,6 @@ Vodacom's customer service management team needs comprehensive reporting capabil
          SELECT package_name || ' (R' || price || ')' AS d,
                 package_id AS r
          FROM vodacom_packages
-         WHERE is_active = 'Y'
          ORDER BY package_name
          ```
 
@@ -410,12 +414,6 @@ Vodacom's customer service management team needs comprehensive reporting capabil
      - PL/SQL Expression: `TRUNC(SYSDATE) + 30`
      - Format Mask: `YYYY-MM-DD`
    
-   - **P30_BILLING_PERIOD**:
-     - Type: `Select List`
-     - List of Values:
-       - Static: `Monthly,Monthly,Quarterly,Quarterly,Annual,Annual`
-     - Default: `Monthly`
-   
    - **P30_STATUS**:
      - Type: `Select List`
      - List of Values:
@@ -446,7 +444,7 @@ Vodacom's customer service management team needs comprehensive reporting capabil
             (li.quantity * li.unit_price) + NVL(li.tax_amount, 0) AS total_with_tax
      FROM vodacom_invoice_items li
      WHERE li.invoice_id = :P30_INVOICE_ID
-     ORDER BY li.line_item_id
+         -- Sorting handled via Interactive Grid attributes
      ```
    - Page Items to Submit: `P30_INVOICE_ID`
 
@@ -459,6 +457,7 @@ Vodacom's customer service management team needs comprehensive reporting capabil
    - **LINE_ITEM_ID**:
      - Type: `Hidden`
      - Primary Key: `Yes`
+   - In the detail grid's **Attributes → Sort** section, add `LINE_ITEM_ID` ascending so rows keep their natural order without an `ORDER BY` clause.
    
    - **INVOICE_ID**:
      - Type: `Hidden`
@@ -531,8 +530,7 @@ Vodacom's customer service management team needs comprehensive reporting capabil
          :P30_TOTAL_AMOUNT := NVL(v_total, 0);
          
          UPDATE vodacom_invoices
-         SET total_amount = NVL(v_total, 0),
-             updated_date = SYSTIMESTAMP
+         SET total_amount = NVL(v_total, 0)
          WHERE invoice_id = :P30_INVOICE_ID;
        END;
        ```
@@ -561,7 +559,7 @@ Vodacom's customer service management team needs comprehensive reporting capabil
             c.first_name || ' ' || c.last_name AS customer_name,
             i.invoice_date,
             i.due_date,
-            i.billing_period,
+            TO_CHAR(i.invoice_date, 'YYYY-MM') AS billing_period,
             i.status,
             i.total_amount,
             CASE
@@ -577,29 +575,33 @@ Vodacom's customer service management team needs comprehensive reporting capabil
             END AS days_overdue
      FROM vodacom_invoices i
      JOIN vodacom_customers c ON i.customer_id = c.customer_id
-     ORDER BY i.invoice_date DESC
+     -- Sorting handled via Interactive Report attributes
      ```
    - Link Column: `INVOICE_NUMBER`
    - Target Page: `30`
    - Set Item: `P30_INVOICE_ID` → `#INVOICE_ID#`
+   - Configure default sorting inside the report (**Attributes → Sort**) so that `INVOICE_DATE` is descending and `STATUS` is ascending for consistent ordering without `ORDER BY` in the SQL source.
 
 ---
 
 ## Challenge Exercises
 
 ### Challenge 1: Add Revenue Aggregations to Customer Report
+
 - Add control break on `PROVINCE`
 - Show sum of `TOTAL_BALANCE` per province
 - Add grand total at bottom
 - Calculate percentage of total by province
 
 ### Challenge 2: Create Email Invoice Functionality
+
 - Add "Send Invoice via SMS" button on page 30
 - Create process to generate PDF invoice
 - Send SMS notification with payment link
 - Log sent invoices in audit table
 
 ### Challenge 3: Implement Data Usage Reporting
+
 - Create new report showing data consumption by package
 - Add chart showing peak usage times
 - Highlight customers nearing data limits (upsell opportunity)
