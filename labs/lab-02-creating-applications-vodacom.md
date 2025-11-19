@@ -461,6 +461,49 @@ Marketing teams can now:
 - Analyze package performance
 - Update offers without IT involvement
 
+### Exercise 2.3: Extend Package App with Network Issue Insights (Optional)
+
+Use this optional exercise to embed the Active Network Issues report directly inside the application you created from the spreadsheet import. This teaches the team how to blend spreadsheet-driven apps with existing Vodacom operational data.
+
+#### 2.3.1 SQL Source for the "Active Network Issues" Region
+
+Use the following SQL when adding an **Interactive Report** or **Interactive Grid** region (Page Designer → Create Region → SQL Query). The query avoids `ORDER BY` clauses so it is fully APEX-compliant and introduces a hidden severity rank column you can use for default sorting within the report attributes.
+
+```sql
+SELECT ni.issue_id,
+      ni.issue_ref,
+      ni.issue_type,
+      ni.severity,
+      CASE ni.severity
+         WHEN 'Critical' THEN 1
+         WHEN 'High'     THEN 2
+         WHEN 'Medium'   THEN 3
+         ELSE 4
+      END AS severity_rank,
+      nt.tower_code,
+      nt.tower_name,
+      nt.province,
+      nt.city,
+      ni.affected_customers,
+      TO_CHAR(ni.reported_date, 'YYYY-MM-DD HH24:MI') AS reported_date,
+      CASE 
+         WHEN ni.status = 'Resolved' THEN ni.resolved_date
+         ELSE CAST(NULL AS TIMESTAMP)
+      END AS resolved_date,
+      ni.status,
+      e.first_name || ' ' || e.last_name AS assigned_technician,
+      ni.description
+FROM vodacom_network_issues ni
+LEFT JOIN vodacom_network_towers nt ON ni.tower_id = nt.tower_id
+LEFT JOIN vodacom_employees e ON ni.assigned_to = e.emp_id
+WHERE ni.status IN ('Open', 'Acknowledged', 'In Progress');
+```
+
+Configuration tips:
+- Hide `SEVERITY_RANK` (set Display → Type = Hidden) but keep it as the first default sort column (ascending). Add `REPORTED_DATE` as the second default sort column (descending) directly in the report/grid attributes panel.
+- Format `AFFECTED_CUSTOMERS` with `999G999G999` and `REPORTED_DATE` with `YYYY-MM-DD HH24:MI`.
+- Enable editing or row selection if you want to route records to the existing Package Management form pages.
+
 ---
 
 ## Part 3: Create Application from SQL Query (20 minutes)
@@ -493,23 +536,35 @@ Marketing teams can now:
               WHEN 'Medium' THEN '<span style="color:blue;">●</span> Medium'
               WHEN 'Low' THEN '<span style="color:green;">●</span> Low'
           END AS severity_display,
+           CASE ni.severity
+              WHEN 'Critical' THEN 1
+              WHEN 'High' THEN 2
+              WHEN 'Medium' THEN 3
+              ELSE 4
+           END AS severity_rank,
           nt.tower_code,
           nt.tower_name,
           nt.province,
           nt.city,
           ni.affected_customers,
           ni.reported_date,
-          CASE 
+           CASE 
               WHEN ni.status = 'Resolved' THEN ni.resolved_date
-              ELSE NULL
-          END AS resolved_date,
+              ELSE CAST(NULL AS TIMESTAMP)
+           END AS resolved_date,
           CASE 
               WHEN ni.status = 'Resolved' THEN 
                   ROUND((ni.resolved_date - ni.reported_date) * 24, 1)
               ELSE
-                  ROUND((SYSTIMESTAMP - ni.reported_date) * 24, 1)
+                  ROUND((SYSDATE - ni.reported_date) * 24, 1)
           END AS hours_to_resolve,
           ni.status,
+           CASE ni.status
+              WHEN 'Open' THEN 1
+              WHEN 'Acknowledged' THEN 2
+              WHEN 'In Progress' THEN 3
+              ELSE 4
+           END AS status_rank,
           CASE ni.status
               WHEN 'Open' THEN '<span class="badge badge-danger">Open</span>'
               WHEN 'Acknowledged' THEN '<span class="badge badge-warning">Acknowledged</span>'
@@ -521,19 +576,15 @@ Marketing teams can now:
    FROM vodacom_network_issues ni
    LEFT JOIN vodacom_network_towers nt ON ni.tower_id = nt.tower_id
    LEFT JOIN vodacom_employees e ON ni.assigned_to = e.emp_id
-   ORDER BY 
-       CASE ni.status 
-           WHEN 'Open' THEN 1
-           WHEN 'Acknowledged' THEN 2
-           WHEN 'In Progress' THEN 3
-           WHEN 'Resolved' THEN 4
-       END,
-       ni.severity DESC,
-       ni.reported_date DESC;
+      -- Sorting handled via Interactive Report Attributes
    ```
    
    - ✓ Include Form
    - Click **Add Page**
+      - After the region is created, configure sorting inside the Interactive Report instead of relying on `ORDER BY`:
+       1. In Page Designer, select the **Network Issues** region → **Attributes** → **Sort**.
+       2. Add three entries: `STATUS_RANK` ascending, `SEVERITY_RANK` ascending, and `REPORTED_DATE` descending.
+       3. Hide the helper columns (`SEVERITY_RANK`, `STATUS_RANK`) by setting their Type to `Hidden` so end-users don’t see them.
 
 3. **Add Tower Status Chart**
    - Click **Add Page**
@@ -572,6 +623,12 @@ Marketing teams can now:
           cs.issue_category,
           cs.issue_type,
           cs.priority,
+           CASE cs.priority
+              WHEN 'Urgent' THEN 1
+              WHEN 'High' THEN 2
+              WHEN 'Normal' THEN 3
+              ELSE 4
+           END AS priority_rank,
           cs.status,
           cs.created_date,
           ROUND(SYSDATE - cs.created_date, 1) AS days_open,
@@ -587,18 +644,12 @@ Marketing teams can now:
    JOIN vodacom_customers c ON cs.customer_id = c.customer_id
    LEFT JOIN vodacom_employees e ON cs.assigned_to = e.emp_id
    WHERE cs.status NOT IN ('Resolved', 'Closed')
-   ORDER BY 
-       CASE cs.priority
-           WHEN 'Urgent' THEN 1
-           WHEN 'High' THEN 2
-           WHEN 'Normal' THEN 3
-           ELSE 4
-       END,
-       cs.created_date;
+      -- Sorting handled using Interactive Report attributes
    ```
    
    - ✓ Include Form
    - Click **Add Page**
+      - Configure report sorting inside APEX: **Attributes → Sort** → add `PRIORITY_RANK` ascending then `CREATED_DATE` descending. Hide the helper column by setting **PRIORITY_RANK** to `Hidden` so it’s only used for ordering.
 
 5. **Add Customer Activity Dashboard**
    - Click **Add Page**
@@ -743,8 +794,10 @@ Network Operations can now:
           registration_date
    FROM vodacom_customers
    WHERE account_status = 'Active'
-   ORDER BY registration_date DESC;
+      -- Sorting handled via Report Attributes
    ```
+
+      - In the Customers report region, open **Attributes → Sort** and add `REGISTRATION_DATE` descending so the newest records appear first without using `ORDER BY` in the SQL source.
 
 8. **Test Customizations**
    - Save and run the application
@@ -1022,7 +1075,7 @@ In **Lab 03: Pages and Page Designer**, you will:
 ## Additional Resources
 
 **APEX Create Application Documentation:**
-- https://docs.oracle.com/en/database/oracle/apex/23.1/htmdb/creating-database-applications.html
+- https://docs.oracle.com/en/database/oracle/apex/24.2/htmdb/creating-database-applications.html
 
 **Sample Applications Gallery:**
 - From APEX home page: **Gallery** > **Sample Apps**
