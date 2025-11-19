@@ -74,8 +74,8 @@ Vodacom is ready to deploy the Customer Service Portal to production:
      
      -- Departments
      SELECT 'INSERT INTO vodacom_departments VALUES (' ||
-            department_id || ',' ||
-            '''' || department_name || ''',' ||
+            dept_id || ',' ||
+            '''' || dept_name || ''',' ||
             '''' || location || ''');'
      FROM vodacom_departments;
      
