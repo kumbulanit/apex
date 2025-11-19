@@ -159,22 +159,25 @@ CREATE TABLE vodacom_mobile_numbers (
     status            VARCHAR2(20) DEFAULT 'Active',
     current_package   VARCHAR2(100),
     data_balance_mb   NUMBER(10,2) DEFAULT 0,
+    airtime_balance   NUMBER(10,2) DEFAULT 0,
+    sms_balance       NUMBER(6,0) DEFAULT 0,
+    voice_minutes_balance NUMBER(6,0) DEFAULT 0,
     CONSTRAINT fk_mobile_customer FOREIGN KEY (customer_id) REFERENCES vodacom_customers(customer_id)
 );
 
 CREATE SEQUENCE vodacom_mobile_numbers_seq START WITH 1;
 
--- Insert 10 mobile numbers
-INSERT INTO vodacom_mobile_numbers VALUES (1, '0821234567', 1, 'Prepaid', 'SIM8927012345678901', DATE '2023-01-15', 'Active', 'Smart S', 512);
-INSERT INTO vodacom_mobile_numbers VALUES (2, '0839876543', 2, 'Contract', 'SIM8927012345678902', DATE '2023-02-20', 'Active', 'Red Plan 199', 1024);
-INSERT INTO vodacom_mobile_numbers VALUES (3, '0765432109', 3, 'Prepaid', 'SIM8927012345678903', DATE '2023-03-10', 'Active', 'Smart L', 2560);
-INSERT INTO vodacom_mobile_numbers VALUES (4, '0734567890', 4, 'Contract', 'SIM8927012345678904', DATE '2023-04-05', 'Active', 'Red Plan 299', 3072);
-INSERT INTO vodacom_mobile_numbers VALUES (5, '0827654321', 5, 'Prepaid', 'SIM8927012345678905', DATE '2023-05-12', 'Active', 'Smart M', 1536);
-INSERT INTO vodacom_mobile_numbers VALUES (6, '0115551234', 6, 'Contract', 'SIM8927012345678906', DATE '2023-06-18', 'Active', 'Red Plan 499', 10240);
-INSERT INTO vodacom_mobile_numbers VALUES (7, '0789012345', 7, 'Prepaid', 'SIM8927012345678907', DATE '2023-07-22', 'Active', 'Smart XL', 5120);
-INSERT INTO vodacom_mobile_numbers VALUES (8, '0736789012', 8, 'Prepaid', 'SIM8927012345678908', DATE '2023-08-30', 'Active', 'Smart S', 256);
-INSERT INTO vodacom_mobile_numbers VALUES (9, '0821231234', 9, 'Prepaid', 'SIM8927012345678909', DATE '2023-09-14', 'Active', 'Smart M', 1024);
-INSERT INTO vodacom_mobile_numbers VALUES (10, '0739876543', 10, 'Prepaid', 'SIM8927012345678910', DATE '2023-10-08', 'Active', 'Data Only 5GB', 2048);
+-- Insert 10 mobile numbers (with balance columns)
+INSERT INTO vodacom_mobile_numbers VALUES (1, '0821234567', 1, 'Prepaid', 'SIM8927012345678901', DATE '2023-01-15', 'Active', 'Smart S', 512, 25.50, 50, 80);
+INSERT INTO vodacom_mobile_numbers VALUES (2, '0839876543', 2, 'Contract', 'SIM8927012345678902', DATE '2023-02-20', 'Active', 'Red Plan 199', 1024, 0, 150, 200);
+INSERT INTO vodacom_mobile_numbers VALUES (3, '0765432109', 3, 'Prepaid', 'SIM8927012345678903', DATE '2023-03-10', 'Active', 'Smart L', 2560, 85.75, 300, 450);
+INSERT INTO vodacom_mobile_numbers VALUES (4, '0734567890', 4, 'Contract', 'SIM8927012345678904', DATE '2023-04-05', 'Active', 'Red Plan 299', 3072, 0, 400, 550);
+INSERT INTO vodacom_mobile_numbers VALUES (5, '0827654321', 5, 'Prepaid', 'SIM8927012345678905', DATE '2023-05-12', 'Active', 'Smart M', 1536, 42.00, 100, 150);
+INSERT INTO vodacom_mobile_numbers VALUES (6, '0115551234', 6, 'Contract', 'SIM8927012345678906', DATE '2023-06-18', 'Active', 'Red Plan 499', 10240, 0, 800, 1000);
+INSERT INTO vodacom_mobile_numbers VALUES (7, '0789012345', 7, 'Prepaid', 'SIM8927012345678907', DATE '2023-07-22', 'Active', 'Smart XL', 5120, 150.25, 600, 800);
+INSERT INTO vodacom_mobile_numbers VALUES (8, '0736789012', 8, 'Prepaid', 'SIM8927012345678908', DATE '2023-08-30', 'Active', 'Smart S', 256, 15.00, 25, 50);
+INSERT INTO vodacom_mobile_numbers VALUES (9, '0821231234', 9, 'Prepaid', 'SIM8927012345678909', DATE '2023-09-14', 'Active', 'Smart M', 1024, 55.50, 120, 180);
+INSERT INTO vodacom_mobile_numbers VALUES (10, '0739876543', 10, 'Prepaid', 'SIM8927012345678910', DATE '2023-10-08', 'Active', 'Data Only 5GB', 2048, 0, 0, 0);
 
 COMMIT;
 
@@ -183,9 +186,11 @@ COMMIT;
 -- ============================================================================
 CREATE TABLE vodacom_packages (
     package_id        NUMBER PRIMARY KEY,
+    package_code      VARCHAR2(20) NOT NULL UNIQUE,
     package_name      VARCHAR2(100) NOT NULL,
     package_type      VARCHAR2(20),
     data_mb           NUMBER(8,0),
+    data_allocation_mb NUMBER(8,0),
     voice_minutes     NUMBER(6,0),
     sms_count         NUMBER(6,0),
     price             NUMBER(8,2) NOT NULL,
@@ -195,16 +200,16 @@ CREATE TABLE vodacom_packages (
 CREATE SEQUENCE vodacom_packages_seq START WITH 1;
 
 -- Insert 10 packages
-INSERT INTO vodacom_packages VALUES (1, 'Smart S', 'Prepaid', 1024, 100, 100, 99.00, 30);
-INSERT INTO vodacom_packages VALUES (2, 'Smart M', 'Prepaid', 2048, 200, 200, 149.00, 30);
-INSERT INTO vodacom_packages VALUES (3, 'Smart L', 'Prepaid', 5120, 500, 500, 299.00, 30);
-INSERT INTO vodacom_packages VALUES (4, 'Smart XL', 'Prepaid', 10240, 1000, 1000, 499.00, 30);
-INSERT INTO vodacom_packages VALUES (5, 'Red Plan 199', 'Contract', 2048, 300, 300, 199.00, 30);
-INSERT INTO vodacom_packages VALUES (6, 'Red Plan 299', 'Contract', 5120, 600, 600, 299.00, 30);
-INSERT INTO vodacom_packages VALUES (7, 'Red Plan 499', 'Contract', 15360, 1200, 1200, 499.00, 30);
-INSERT INTO vodacom_packages VALUES (8, 'Data Only 1GB', 'Data', 1024, 0, 0, 49.00, 7);
-INSERT INTO vodacom_packages VALUES (9, 'Data Only 5GB', 'Data', 5120, 0, 0, 199.00, 30);
-INSERT INTO vodacom_packages VALUES (10, 'Night Owl 10GB', 'Data', 10240, 0, 0, 99.00, 30);
+INSERT INTO vodacom_packages VALUES (1, 'PKG-SS-001', 'Smart S', 'Prepaid', 1024, 1024, 100, 100, 99.00, 30);
+INSERT INTO vodacom_packages VALUES (2, 'PKG-SM-002', 'Smart M', 'Prepaid', 2048, 2048, 200, 200, 149.00, 30);
+INSERT INTO vodacom_packages VALUES (3, 'PKG-SL-003', 'Smart L', 'Prepaid', 5120, 5120, 500, 500, 299.00, 30);
+INSERT INTO vodacom_packages VALUES (4, 'PKG-SXL-004', 'Smart XL', 'Prepaid', 10240, 10240, 1000, 1000, 499.00, 30);
+INSERT INTO vodacom_packages VALUES (5, 'PKG-RED199', 'Red Plan 199', 'Contract', 2048, 2048, 300, 300, 199.00, 30);
+INSERT INTO vodacom_packages VALUES (6, 'PKG-RED299', 'Red Plan 299', 'Contract', 5120, 5120, 600, 600, 299.00, 30);
+INSERT INTO vodacom_packages VALUES (7, 'PKG-RED499', 'Red Plan 499', 'Contract', 15360, 15360, 1200, 1200, 499.00, 30);
+INSERT INTO vodacom_packages VALUES (8, 'PKG-D1GB', 'Data Only 1GB', 'Data', 1024, 1024, 0, 0, 49.00, 7);
+INSERT INTO vodacom_packages VALUES (9, 'PKG-D5GB', 'Data Only 5GB', 'Data', 5120, 5120, 0, 0, 199.00, 30);
+INSERT INTO vodacom_packages VALUES (10, 'PKG-NIGHT10', 'Night Owl 10GB', 'Data', 10240, 10240, 0, 0, 99.00, 30);
 
 COMMIT;
 
@@ -252,6 +257,7 @@ CREATE TABLE vodacom_network_issues (
     tower_id          NUMBER,
     issue_type        VARCHAR2(50),
     description       VARCHAR2(500),
+    affected_customers NUMBER(10,0) DEFAULT 0,
     severity          VARCHAR2(20),
     status            VARCHAR2(20) DEFAULT 'Open',
     reported_date     DATE DEFAULT SYSDATE,
@@ -264,16 +270,16 @@ CREATE TABLE vodacom_network_issues (
 CREATE SEQUENCE vodacom_network_issues_seq START WITH 1;
 
 -- Insert 10 network issues
-INSERT INTO vodacom_network_issues VALUES (1, 'ISS-2024-001', 1, 'Signal Degradation', 'Intermittent signal loss reported by customers', 'High', 'In Progress', DATE '2024-01-10', NULL, 5);
-INSERT INTO vodacom_network_issues VALUES (2, 'ISS-2024-002', 2, 'Power Outage', 'Tower experienced power failure', 'Critical', 'Resolved', DATE '2024-01-15', DATE '2024-01-16', 5);
-INSERT INTO vodacom_network_issues VALUES (3, 'ISS-2024-003', 3, 'Equipment Malfunction', '5G antenna not responding', 'High', 'In Progress', DATE '2024-02-01', NULL, 5);
-INSERT INTO vodacom_network_issues VALUES (4, 'ISS-2024-004', 4, 'Interference', 'External interference affecting signal quality', 'Medium', 'Open', DATE '2024-02-05', NULL, 5);
-INSERT INTO vodacom_network_issues VALUES (5, 'ISS-2024-005', 5, 'Maintenance Required', 'Scheduled maintenance due', 'Low', 'Scheduled', DATE '2024-02-10', NULL, 5);
-INSERT INTO vodacom_network_issues VALUES (6, 'ISS-2024-006', 6, 'Weather Damage', 'Lightning strike damaged equipment', 'Critical', 'Resolved', DATE '2024-01-20', DATE '2024-01-25', 5);
-INSERT INTO vodacom_network_issues VALUES (7, 'ISS-2024-007', 7, 'Capacity Overload', 'Tower reaching capacity limits', 'Medium', 'Open', DATE '2024-02-12', NULL, 5);
-INSERT INTO vodacom_network_issues VALUES (8, 'ISS-2024-008', 8, 'Cable Theft', 'Copper cables stolen', 'High', 'In Progress', DATE '2024-02-15', NULL, 5);
-INSERT INTO vodacom_network_issues VALUES (9, 'ISS-2024-009', 9, 'Software Update', 'Firmware update required', 'Low', 'Scheduled', DATE '2024-02-18', NULL, 5);
-INSERT INTO vodacom_network_issues VALUES (10, 'ISS-2024-010', 10, 'Signal Degradation', 'Poor coverage in surrounding area', 'Medium', 'Open', DATE '2024-02-20', NULL, 5);
+INSERT INTO vodacom_network_issues VALUES (1, 'ISS-2024-001', 1, 'Signal Degradation', 'Intermittent signal loss reported by customers', 3200, 'High', 'In Progress', DATE '2024-01-10', NULL, 5);
+INSERT INTO vodacom_network_issues VALUES (2, 'ISS-2024-002', 2, 'Power Outage', 'Tower experienced power failure', 1800, 'Critical', 'Resolved', DATE '2024-01-15', DATE '2024-01-16', 5);
+INSERT INTO vodacom_network_issues VALUES (3, 'ISS-2024-003', 3, 'Equipment Malfunction', '5G antenna not responding', 2500, 'High', 'In Progress', DATE '2024-02-01', NULL, 5);
+INSERT INTO vodacom_network_issues VALUES (4, 'ISS-2024-004', 4, 'Interference', 'External interference affecting signal quality', 1200, 'Medium', 'Open', DATE '2024-02-05', NULL, 5);
+INSERT INTO vodacom_network_issues VALUES (5, 'ISS-2024-005', 5, 'Maintenance Required', 'Scheduled maintenance due', 400, 'Low', 'Scheduled', DATE '2024-02-10', NULL, 5);
+INSERT INTO vodacom_network_issues VALUES (6, 'ISS-2024-006', 6, 'Weather Damage', 'Lightning strike damaged equipment', 6000, 'Critical', 'Resolved', DATE '2024-01-20', DATE '2024-01-25', 5);
+INSERT INTO vodacom_network_issues VALUES (7, 'ISS-2024-007', 7, 'Capacity Overload', 'Tower reaching capacity limits', 900, 'Medium', 'Open', DATE '2024-02-12', NULL, 5);
+INSERT INTO vodacom_network_issues VALUES (8, 'ISS-2024-008', 8, 'Cable Theft', 'Copper cables stolen', 2200, 'High', 'In Progress', DATE '2024-02-15', NULL, 5);
+INSERT INTO vodacom_network_issues VALUES (9, 'ISS-2024-009', 9, 'Software Update', 'Firmware update required', 150, 'Low', 'Scheduled', DATE '2024-02-18', NULL, 5);
+INSERT INTO vodacom_network_issues VALUES (10, 'ISS-2024-010', 10, 'Signal Degradation', 'Poor coverage in surrounding area', 800, 'Medium', 'Open', DATE '2024-02-20', NULL, 5);
 
 COMMIT;
 
@@ -282,8 +288,10 @@ COMMIT;
 -- ============================================================================
 CREATE TABLE vodacom_customer_support (
     ticket_id         NUMBER PRIMARY KEY,
+    ticket_number     VARCHAR2(30) NOT NULL UNIQUE,
     ticket_ref        VARCHAR2(30) NOT NULL UNIQUE,
     customer_id       NUMBER NOT NULL,
+    issue_category    VARCHAR2(50) DEFAULT 'General',
     issue_type        VARCHAR2(50),
     priority          VARCHAR2(20) DEFAULT 'Medium',
     status            VARCHAR2(20) DEFAULT 'Open',
@@ -298,17 +306,106 @@ CREATE TABLE vodacom_customer_support (
 
 CREATE SEQUENCE vodacom_customer_support_seq START WITH 1;
 
--- Insert 10 support tickets
-INSERT INTO vodacom_customer_support VALUES (1, 'TKT-2024-001', 1, 'Billing Query', 'High', 'Resolved', 'Incorrect charge on bill', DATE '2024-01-10', DATE '2024-01-12', 2, 'Refund processed');
-INSERT INTO vodacom_customer_support VALUES (2, 'TKT-2024-002', 2, 'Network Issue', 'High', 'In Progress', 'No signal at home', DATE '2024-01-15', NULL, 2, NULL);
-INSERT INTO vodacom_customer_support VALUES (3, 'TKT-2024-003', 3, 'Data Issue', 'Medium', 'Resolved', 'Data not working', DATE '2024-01-20', DATE '2024-01-21', 3, 'APN settings corrected');
-INSERT INTO vodacom_customer_support VALUES (4, 'TKT-2024-004', 4, 'SIM Card', 'High', 'Resolved', 'SIM not detected', DATE '2024-01-25', DATE '2024-01-26', 2, 'New SIM card issued');
-INSERT INTO vodacom_customer_support VALUES (5, 'TKT-2024-005', 5, 'Account Access', 'Medium', 'Open', 'Cannot login to MyVodacom app', DATE '2024-02-01', NULL, 3, NULL);
-INSERT INTO vodacom_customer_support VALUES (6, 'TKT-2024-006', 6, 'VodaPay Query', 'Low', 'Resolved', 'How to activate VodaPay', DATE '2024-02-05', DATE '2024-02-05', 2, 'Activation steps sent via SMS');
-INSERT INTO vodacom_customer_support VALUES (7, 'TKT-2024-007', 7, 'Package Upgrade', 'Low', 'In Progress', 'Want to upgrade package', DATE '2024-02-10', NULL, 3, NULL);
-INSERT INTO vodacom_customer_support VALUES (8, 'TKT-2024-008', 8, 'Network Issue', 'High', 'Open', 'Frequent call drops', DATE '2024-02-15', NULL, 2, NULL);
-INSERT INTO vodacom_customer_support VALUES (9, 'TKT-2024-009', 9, 'Data Query', 'Medium', 'Resolved', 'Data depleting too fast', DATE '2024-02-18', DATE '2024-02-19', 3, 'Data usage report provided');
-INSERT INTO vodacom_customer_support VALUES (10, 'TKT-2024-010', 10, 'General Query', 'Low', 'Resolved', 'Contract renewal options', DATE '2024-02-20', DATE '2024-02-20', 2, 'Options emailed to customer');
+-- Insert 10 support tickets with categorized issues
+INSERT INTO vodacom_customer_support (
+    ticket_id, ticket_number, ticket_ref, customer_id, issue_category,
+    issue_type, priority, status, description,
+    created_date, resolved_date, assigned_to, resolution_notes
+) VALUES (
+    1, 'TKT-2024-001', 'TKT-2024-001', 1, 'Billing',
+    'Billing Query', 'High', 'Resolved', 'Incorrect charge on bill',
+    DATE '2024-01-10', DATE '2024-01-12', 2, 'Refund processed'
+);
+
+INSERT INTO vodacom_customer_support (
+    ticket_id, ticket_number, ticket_ref, customer_id, issue_category,
+    issue_type, priority, status, description,
+    created_date, resolved_date, assigned_to, resolution_notes
+) VALUES (
+    2, 'TKT-2024-002', 'TKT-2024-002', 2, 'Network',
+    'Network Issue', 'High', 'In Progress', 'No signal at home',
+    DATE '2024-01-15', NULL, 2, NULL
+);
+
+INSERT INTO vodacom_customer_support (
+    ticket_id, ticket_number, ticket_ref, customer_id, issue_category,
+    issue_type, priority, status, description,
+    created_date, resolved_date, assigned_to, resolution_notes
+) VALUES (
+    3, 'TKT-2024-003', 'TKT-2024-003', 3, 'Technical',
+    'Data Issue', 'Medium', 'Resolved', 'Data not working',
+    DATE '2024-01-20', DATE '2024-01-21', 3, 'APN settings corrected'
+);
+
+INSERT INTO vodacom_customer_support (
+    ticket_id, ticket_number, ticket_ref, customer_id, issue_category,
+    issue_type, priority, status, description,
+    created_date, resolved_date, assigned_to, resolution_notes
+) VALUES (
+    4, 'TKT-2024-004', 'TKT-2024-004', 4, 'SIM',
+    'SIM Card', 'High', 'Resolved', 'SIM not detected',
+    DATE '2024-01-25', DATE '2024-01-26', 2, 'New SIM card issued'
+);
+
+INSERT INTO vodacom_customer_support (
+    ticket_id, ticket_number, ticket_ref, customer_id, issue_category,
+    issue_type, priority, status, description,
+    created_date, resolved_date, assigned_to, resolution_notes
+) VALUES (
+    5, 'TKT-2024-005', 'TKT-2024-005', 5, 'Account',
+    'Account Access', 'Medium', 'Open', 'Cannot login to MyVodacom app',
+    DATE '2024-02-01', NULL, 3, NULL
+);
+
+INSERT INTO vodacom_customer_support (
+    ticket_id, ticket_number, ticket_ref, customer_id, issue_category,
+    issue_type, priority, status, description,
+    created_date, resolved_date, assigned_to, resolution_notes
+) VALUES (
+    6, 'TKT-2024-006', 'TKT-2024-006', 6, 'VodaPay',
+    'VodaPay Query', 'Low', 'Resolved', 'How to activate VodaPay',
+    DATE '2024-02-05', DATE '2024-02-05', 2, 'Activation steps sent via SMS'
+);
+
+INSERT INTO vodacom_customer_support (
+    ticket_id, ticket_number, ticket_ref, customer_id, issue_category,
+    issue_type, priority, status, description,
+    created_date, resolved_date, assigned_to, resolution_notes
+) VALUES (
+    7, 'TKT-2024-007', 'TKT-2024-007', 7, 'Request',
+    'Package Upgrade', 'Low', 'In Progress', 'Want to upgrade package',
+    DATE '2024-02-10', NULL, 3, NULL
+);
+
+INSERT INTO vodacom_customer_support (
+    ticket_id, ticket_number, ticket_ref, customer_id, issue_category,
+    issue_type, priority, status, description,
+    created_date, resolved_date, assigned_to, resolution_notes
+) VALUES (
+    8, 'TKT-2024-008', 'TKT-2024-008', 8, 'Network',
+    'Network Issue', 'High', 'Open', 'Frequent call drops',
+    DATE '2024-02-15', NULL, 2, NULL
+);
+
+INSERT INTO vodacom_customer_support (
+    ticket_id, ticket_number, ticket_ref, customer_id, issue_category,
+    issue_type, priority, status, description,
+    created_date, resolved_date, assigned_to, resolution_notes
+) VALUES (
+    9, 'TKT-2024-009', 'TKT-2024-009', 9, 'Data',
+    'Data Query', 'Medium', 'Resolved', 'Data depleting too fast',
+    DATE '2024-02-18', DATE '2024-02-19', 3, 'Data usage report provided'
+);
+
+INSERT INTO vodacom_customer_support (
+    ticket_id, ticket_number, ticket_ref, customer_id, issue_category,
+    issue_type, priority, status, description,
+    created_date, resolved_date, assigned_to, resolution_notes
+) VALUES (
+    10, 'TKT-2024-010', 'TKT-2024-010', 10, 'General',
+    'General Query', 'Low', 'Resolved', 'Contract renewal options',
+    DATE '2024-02-20', DATE '2024-02-20', 2, 'Options emailed to customer'
+);
 
 COMMIT;
 
@@ -323,6 +420,7 @@ CREATE TABLE vodacom_sales (
     sale_type         VARCHAR2(50),
     product_name      VARCHAR2(200),
     sale_amount       NUMBER(10,2) NOT NULL,
+    total_amount      NUMBER(10,2) NOT NULL,
     sale_date         DATE DEFAULT SYSDATE,
     commission_amount NUMBER(8,2),
     payment_method    VARCHAR2(50),
@@ -333,16 +431,16 @@ CREATE TABLE vodacom_sales (
 CREATE SEQUENCE vodacom_sales_seq START WITH 1;
 
 -- Insert 10 sales transactions
-INSERT INTO vodacom_sales VALUES (1, 'SAL-2024-001', 1, 7, 'Device Sale', 'Samsung Galaxy A54', 5999.00, DATE '2024-01-10', 599.90, 'Cash');
-INSERT INTO vodacom_sales VALUES (2, 'SAL-2024-002', 2, 7, 'Contract Sign-up', 'Red Plan 199 with iPhone 14', 15999.00, DATE '2024-01-15', 1599.90, 'Contract');
-INSERT INTO vodacom_sales VALUES (3, 'SAL-2024-003', 3, 7, 'Device Sale', 'Huawei P40', 8999.00, DATE '2024-01-20', 899.90, 'Card');
-INSERT INTO vodacom_sales VALUES (4, 'SAL-2024-004', 4, 7, 'Contract Upgrade', 'Red Plan 299 with Samsung S23', 12999.00, DATE '2024-01-25', 1299.90, 'Contract');
-INSERT INTO vodacom_sales VALUES (5, 'SAL-2024-005', 5, 7, 'Accessory Sale', 'Wireless Earbuds', 1299.00, DATE '2024-02-01', 129.90, 'Cash');
-INSERT INTO vodacom_sales VALUES (6, 'SAL-2024-006', 6, 7, 'Device Sale', 'Samsung Galaxy Tab', 4999.00, DATE '2024-02-05', 499.90, 'EFT');
-INSERT INTO vodacom_sales VALUES (7, 'SAL-2024-007', 7, 7, 'SIM Card Sale', 'Prepaid SIM Starter Pack', 10.00, DATE '2024-02-10', 1.00, 'Cash');
-INSERT INTO vodacom_sales VALUES (8, 'SAL-2024-008', 8, 7, 'Device Sale', 'Xiaomi Redmi Note', 3999.00, DATE '2024-02-15', 399.90, 'Card');
-INSERT INTO vodacom_sales VALUES (9, 'SAL-2024-009', 9, 7, 'Accessory Sale', 'Phone Case and Screen Protector', 399.00, DATE '2024-02-18', 39.90, 'Cash');
-INSERT INTO vodacom_sales VALUES (10, 'SAL-2024-010', 10, 7, 'Contract Sign-up', 'Red Plan 299 with Samsung S24', 14999.00, DATE '2024-02-20', 1499.90, 'Contract');
+INSERT INTO vodacom_sales VALUES (1, 'SAL-2024-001', 1, 7, 'Device Sale', 'Samsung Galaxy A54', 5999.00, 5999.00, DATE '2024-01-10', 599.90, 'Cash');
+INSERT INTO vodacom_sales VALUES (2, 'SAL-2024-002', 2, 7, 'Contract Sign-up', 'Red Plan 199 with iPhone 14', 15999.00, 15999.00, DATE '2024-01-15', 1599.90, 'Contract');
+INSERT INTO vodacom_sales VALUES (3, 'SAL-2024-003', 3, 7, 'Device Sale', 'Huawei P40', 8999.00, 8999.00, DATE '2024-01-20', 899.90, 'Card');
+INSERT INTO vodacom_sales VALUES (4, 'SAL-2024-004', 4, 7, 'Contract Upgrade', 'Red Plan 299 with Samsung S23', 12999.00, 12999.00, DATE '2024-01-25', 1299.90, 'Contract');
+INSERT INTO vodacom_sales VALUES (5, 'SAL-2024-005', 5, 7, 'Accessory Sale', 'Wireless Earbuds', 1299.00, 1299.00, DATE '2024-02-01', 129.90, 'Cash');
+INSERT INTO vodacom_sales VALUES (6, 'SAL-2024-006', 6, 7, 'Device Sale', 'Samsung Galaxy Tab', 4999.00, 4999.00, DATE '2024-02-05', 499.90, 'EFT');
+INSERT INTO vodacom_sales VALUES (7, 'SAL-2024-007', 7, 7, 'SIM Card Sale', 'Prepaid SIM Starter Pack', 10.00, 10.00, DATE '2024-02-10', 1.00, 'Cash');
+INSERT INTO vodacom_sales VALUES (8, 'SAL-2024-008', 8, 7, 'Device Sale', 'Xiaomi Redmi Note', 3999.00, 3999.00, DATE '2024-02-15', 399.90, 'Card');
+INSERT INTO vodacom_sales VALUES (9, 'SAL-2024-009', 9, 7, 'Accessory Sale', 'Phone Case and Screen Protector', 399.00, 399.00, DATE '2024-02-18', 39.90, 'Cash');
+INSERT INTO vodacom_sales VALUES (10, 'SAL-2024-010', 10, 7, 'Contract Sign-up', 'Red Plan 299 with Samsung S24', 14999.00, 14999.00, DATE '2024-02-20', 1499.90, 'Contract');
 
 COMMIT;
 
@@ -363,7 +461,7 @@ CREATE TABLE vodacom_vodapay_accounts (
 
 CREATE SEQUENCE vodacom_vodapay_accounts_seq START WITH 1;
 
--- Insert 10 VodaPay accounts
+-- Insert 10 VodaPay accounts (FIXED: removed duplicate customer_ids)
 INSERT INTO vodacom_vodapay_accounts VALUES (1, 1, 'VP-0821234567', 1250.50, 'Active', DATE '2023-01-15', 'Y', 10000);
 INSERT INTO vodacom_vodapay_accounts VALUES (2, 2, 'VP-0839876543', 3450.00, 'Active', DATE '2023-02-20', 'Y', 10000);
 INSERT INTO vodacom_vodapay_accounts VALUES (3, 3, 'VP-0765432109', 5670.25, 'Active', DATE '2023-03-10', 'Y', 20000);
@@ -371,9 +469,9 @@ INSERT INTO vodacom_vodapay_accounts VALUES (4, 5, 'VP-0827654321', 890.75, 'Act
 INSERT INTO vodacom_vodapay_accounts VALUES (5, 6, 'VP-0115551234', 45000.00, 'Active', DATE '2023-06-18', 'Y', 100000);
 INSERT INTO vodacom_vodapay_accounts VALUES (6, 8, 'VP-0736789012', 2340.50, 'Active', DATE '2023-08-30', 'Y', 10000);
 INSERT INTO vodacom_vodapay_accounts VALUES (7, 9, 'VP-0821231234', 1567.80, 'Active', DATE '2023-09-14', 'Y', 10000);
-INSERT INTO vodacom_vodapay_accounts VALUES (8, 1, 'VP-ALT-001', 450.00, 'Active', DATE '2023-11-01', 'N', 5000);
-INSERT INTO vodacom_vodapay_accounts VALUES (9, 3, 'VP-ALT-002', 780.25, 'Active', DATE '2023-12-05', 'N', 5000);
-INSERT INTO vodacom_vodapay_accounts VALUES (10, 5, 'VP-ALT-003', 320.00, 'Active', DATE '2024-01-10', 'N', 5000);
+INSERT INTO vodacom_vodapay_accounts VALUES (8, 4, 'VP-0734567890', 450.00, 'Active', DATE '2023-11-01', 'Y', 5000);
+INSERT INTO vodacom_vodapay_accounts VALUES (9, 7, 'VP-0789012345', 780.25, 'Active', DATE '2023-12-05', 'Y', 5000);
+INSERT INTO vodacom_vodapay_accounts VALUES (10, 10, 'VP-0739876543', 320.00, 'Active', DATE '2024-01-10', 'N', 5000);
 
 COMMIT;
 
@@ -422,22 +520,23 @@ CREATE TABLE vodacom_invoice_items (
     quantity          NUMBER(8,2) DEFAULT 1,
     unit_price        NUMBER(10,2) NOT NULL,
     amount            NUMBER(10,2) NOT NULL,
+    tax_amount        NUMBER(10,2) DEFAULT 0,
     CONSTRAINT fk_item_invoice FOREIGN KEY (invoice_id) REFERENCES vodacom_invoices(invoice_id) ON DELETE CASCADE
 );
 
 CREATE SEQUENCE vodacom_invoice_items_seq START WITH 1;
 
--- Insert 10 invoice items
-INSERT INTO vodacom_invoice_items VALUES (1, 1, 'Subscription', 'Red Plan 199 Monthly Fee', 1, 199.00, 199.00);
-INSERT INTO vodacom_invoice_items VALUES (2, 2, 'Subscription', 'Red Plan 299 Monthly Fee', 1, 299.00, 299.00);
-INSERT INTO vodacom_invoice_items VALUES (3, 3, 'Subscription', 'Business Plan Monthly Fee', 1, 1999.00, 1999.00);
-INSERT INTO vodacom_invoice_items VALUES (4, 3, 'Service', 'Additional Lines (5x)', 5, 100.00, 500.00);
-INSERT INTO vodacom_invoice_items VALUES (5, 4, 'Subscription', 'Red Plan 199 Monthly Fee', 1, 199.00, 199.00);
-INSERT INTO vodacom_invoice_items VALUES (6, 5, 'Subscription', 'Red Plan 299 Monthly Fee', 1, 299.00, 299.00);
-INSERT INTO vodacom_invoice_items VALUES (7, 6, 'Subscription', 'Business Plan Monthly Fee', 1, 1999.00, 1999.00);
-INSERT INTO vodacom_invoice_items VALUES (8, 6, 'Service', 'Additional Lines (5x)', 5, 100.00, 500.00);
-INSERT INTO vodacom_invoice_items VALUES (9, 10, 'Purchase', 'Samsung Galaxy A54', 1, 549.00, 549.00);
-INSERT INTO vodacom_invoice_items VALUES (10, 1, 'Service', 'Insurance Premium', 1, 49.00, 49.00);
+-- Insert 10 invoice items (FIXED: corrected to match invoice totals)
+INSERT INTO vodacom_invoice_items VALUES (1, 1, 'Subscription', 'Red Plan 199 Monthly Fee', 1, 199.00, 199.00, 29.85);
+INSERT INTO vodacom_invoice_items VALUES (2, 2, 'Subscription', 'Red Plan 299 Monthly Fee', 1, 299.00, 299.00, 44.85);
+INSERT INTO vodacom_invoice_items VALUES (3, 3, 'Subscription', 'Business Plan Monthly Fee', 1, 1999.00, 1999.00, 299.85);
+INSERT INTO vodacom_invoice_items VALUES (4, 3, 'Service', 'Additional Lines (5x)', 5, 100.00, 500.00, 75.00);
+INSERT INTO vodacom_invoice_items VALUES (5, 4, 'Subscription', 'Red Plan 199 Monthly Fee', 1, 199.00, 199.00, 29.85);
+INSERT INTO vodacom_invoice_items VALUES (6, 5, 'Subscription', 'Red Plan 299 Monthly Fee', 1, 299.00, 299.00, 44.85);
+INSERT INTO vodacom_invoice_items VALUES (7, 6, 'Subscription', 'Business Plan Monthly Fee', 1, 1999.00, 1999.00, 299.85);
+INSERT INTO vodacom_invoice_items VALUES (8, 6, 'Service', 'Additional Lines (5x)', 5, 100.00, 500.00, 75.00);
+INSERT INTO vodacom_invoice_items VALUES (9, 10, 'Purchase', 'Samsung Galaxy A54', 1, 549.00, 549.00, 82.35);
+INSERT INTO vodacom_invoice_items VALUES (10, 7, 'Subscription', 'Red Plan 199 Monthly Fee', 1, 199.00, 199.00, 29.85);
 
 COMMIT;
 
@@ -457,13 +556,13 @@ CREATE TABLE vodacom_subscriptions (
 
 CREATE SEQUENCE vodacom_subscriptions_seq START WITH 1;
 
--- Insert 10 subscriptions
+-- Insert 10 subscriptions (FIXED: aligned with contract dates)
 INSERT INTO vodacom_subscriptions VALUES (1, 1, 1, DATE '2024-01-01', DATE '2024-01-31', 'Active');
-INSERT INTO vodacom_subscriptions VALUES (2, 2, 5, DATE '2024-01-01', DATE '2024-01-31', 'Active');
+INSERT INTO vodacom_subscriptions VALUES (2, 2, 5, DATE '2024-01-01', DATE '2026-01-01', 'Active');
 INSERT INTO vodacom_subscriptions VALUES (3, 3, 3, DATE '2024-01-05', DATE '2024-02-04', 'Active');
-INSERT INTO vodacom_subscriptions VALUES (4, 4, 6, DATE '2024-01-10', DATE '2024-02-09', 'Active');
+INSERT INTO vodacom_subscriptions VALUES (4, 4, 6, DATE '2024-01-10', DATE '2026-01-10', 'Active');
 INSERT INTO vodacom_subscriptions VALUES (5, 5, 2, DATE '2024-01-15', DATE '2024-02-14', 'Active');
-INSERT INTO vodacom_subscriptions VALUES (6, 6, 7, DATE '2024-01-20', DATE '2024-02-19', 'Active');
+INSERT INTO vodacom_subscriptions VALUES (6, 6, 7, DATE '2024-01-20', DATE '2027-01-20', 'Active');
 INSERT INTO vodacom_subscriptions VALUES (7, 7, 4, DATE '2024-01-25', DATE '2024-02-24', 'Active');
 INSERT INTO vodacom_subscriptions VALUES (8, 8, 9, DATE '2024-02-01', DATE '2024-03-01', 'Active');
 INSERT INTO vodacom_subscriptions VALUES (9, 9, 8, DATE '2024-02-05', DATE '2024-02-11', 'Expired');
@@ -486,6 +585,7 @@ CREATE TABLE vodacom_transactions (
     status            VARCHAR2(20) DEFAULT 'Completed',
     description       VARCHAR2(200),
     processed_by      NUMBER,
+    channel           VARCHAR2(30) DEFAULT 'Store',
     CONSTRAINT fk_trans_customer FOREIGN KEY (customer_id) REFERENCES vodacom_customers(customer_id),
     CONSTRAINT fk_trans_package FOREIGN KEY (package_id) REFERENCES vodacom_packages(package_id),
     CONSTRAINT fk_trans_emp FOREIGN KEY (processed_by) REFERENCES vodacom_employees(emp_id)
@@ -493,17 +593,17 @@ CREATE TABLE vodacom_transactions (
 
 CREATE SEQUENCE vodacom_transactions_seq START WITH 1;
 
--- Insert 10 transactions
-INSERT INTO vodacom_transactions VALUES (1, 'TXN-2024-001', 1, 1, DATE '2024-01-01', 'Recharge', 99.00, 'Cash', 'Completed', 'Smart S package purchase', 2);
-INSERT INTO vodacom_transactions VALUES (2, 'TXN-2024-002', 2, 5, DATE '2024-01-01', 'Subscription', 199.00, 'Debit Order', 'Completed', 'Red Plan 199 monthly payment', 8);
-INSERT INTO vodacom_transactions VALUES (3, 'TXN-2024-003', 3, 3, DATE '2024-01-05', 'Recharge', 299.00, 'Card', 'Completed', 'Smart L package purchase', 2);
-INSERT INTO vodacom_transactions VALUES (4, 'TXN-2024-004', 4, 6, DATE '2024-01-10', 'Subscription', 299.00, 'Debit Order', 'Completed', 'Red Plan 299 monthly payment', 8);
-INSERT INTO vodacom_transactions VALUES (5, 'TXN-2024-005', 5, 2, DATE '2024-01-15', 'Recharge', 149.00, 'EFT', 'Completed', 'Smart M package purchase', 3);
-INSERT INTO vodacom_transactions VALUES (6, 'TXN-2024-006', 6, 7, DATE '2024-01-20', 'Subscription', 499.00, 'Debit Order', 'Completed', 'Red Plan 499 monthly payment', 8);
-INSERT INTO vodacom_transactions VALUES (7, 'TXN-2024-007', 7, 4, DATE '2024-01-25', 'Recharge', 499.00, 'Cash', 'Completed', 'Smart XL package purchase', 2);
-INSERT INTO vodacom_transactions VALUES (8, 'TXN-2024-008', 8, 9, DATE '2024-02-01', 'Data Purchase', 199.00, 'VodaPay', 'Completed', 'Data Only 5GB purchase', 3);
-INSERT INTO vodacom_transactions VALUES (9, 'TXN-2024-009', 9, 8, DATE '2024-02-05', 'Data Purchase', 49.00, 'Card', 'Pending', 'Data Only 1GB purchase', 2);
-INSERT INTO vodacom_transactions VALUES (10, 'TXN-2024-010', 10, 10, DATE '2024-02-10', 'Data Purchase', 99.00, 'Cash', 'Completed', 'Night Owl 10GB purchase', 3);
+-- Insert 10 transactions (with channel column)
+INSERT INTO vodacom_transactions VALUES (1, 'TXN-2024-001', 1, 1, DATE '2024-01-01', 'Recharge', 99.00, 'Cash', 'Completed', 'Smart S package purchase', 2, 'Store');
+INSERT INTO vodacom_transactions VALUES (2, 'TXN-2024-002', 2, 5, DATE '2024-01-01', 'Subscription', 199.00, 'Debit Order', 'Completed', 'Red Plan 199 monthly payment', 8, 'Debit Order');
+INSERT INTO vodacom_transactions VALUES (3, 'TXN-2024-003', 3, 3, DATE '2024-01-05', 'Recharge', 299.00, 'Card', 'Completed', 'Smart L package purchase', 2, 'Web');
+INSERT INTO vodacom_transactions VALUES (4, 'TXN-2024-004', 4, 6, DATE '2024-01-10', 'Subscription', 299.00, 'Debit Order', 'Completed', 'Red Plan 299 monthly payment', 8, 'Debit Order');
+INSERT INTO vodacom_transactions VALUES (5, 'TXN-2024-005', 5, 2, DATE '2024-01-15', 'Recharge', 149.00, 'EFT', 'Completed', 'Smart M package purchase', 3, 'App');
+INSERT INTO vodacom_transactions VALUES (6, 'TXN-2024-006', 6, 7, DATE '2024-01-20', 'Subscription', 499.00, 'Debit Order', 'Completed', 'Red Plan 499 monthly payment', 8, 'Debit Order');
+INSERT INTO vodacom_transactions VALUES (7, 'TXN-2024-007', 7, 4, DATE '2024-01-25', 'Recharge', 499.00, 'Cash', 'Completed', 'Smart XL package purchase', 2, 'Store');
+INSERT INTO vodacom_transactions VALUES (8, 'TXN-2024-008', 8, 9, DATE '2024-02-01', 'Data Purchase', 199.00, 'VodaPay', 'Completed', 'Data Only 5GB purchase', 3, 'App');
+INSERT INTO vodacom_transactions VALUES (9, 'TXN-2024-009', 9, 8, DATE '2024-02-05', 'Data Purchase', 49.00, 'Card', 'Pending', 'Data Only 1GB purchase', 2, 'USSD');
+INSERT INTO vodacom_transactions VALUES (10, 'TXN-2024-010', 10, 10, DATE '2024-02-10', 'Data Purchase', 99.00, 'Cash', 'Completed', 'Night Owl 10GB purchase', 3, 'Store');
 
 COMMIT;
 
