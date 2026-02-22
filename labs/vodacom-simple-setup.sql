@@ -1,9 +1,23 @@
 -- ============================================================================
--- VODACOM SIMPLE DATABASE SETUP
+-- VODACOM SIMPLE DATABASE SETUP (QUICK DEMO ONLY)
 -- Oracle APEX Training Course
 -- ============================================================================
+--
+-- ⚠️  WARNING: This script is for QUICK DEMOS and PRESENTATIONS ONLY.
+--     It creates a simplified schema with only 10 rows per table and
+--     uses hardcoded PKs (NUMBER) instead of IDENTITY columns.
+--
+--     FOR THE FULL LAB COURSE, use these scripts instead:
+--       1. setup-sample-data-vodacom.sql     (main schema, 13 tables, 100+ rows)
+--       2. vodacom-complete-lab-setup.sql     (supplemental objects for Labs 03-06)
+--
+--     The column schemas in this file are INCOMPATIBLE with the lab
+--     instructions. Do NOT use this script if participants will be
+--     completing Labs 01-07.
+--
+-- ============================================================================
 -- Simple Vodacom mobile network database with sample data
--- 
+--
 -- TABLES CREATED:
 -- 1. Departments - Vodacom departments
 -- 2. Employees - Vodacom staff members

@@ -2,7 +2,18 @@
 
 **Duration:** 60 minutes  
 **Difficulty:** Beginner  
-**Prerequisites:** None (fresh APEX installation)
+**Prerequisites:** Run `setup-sample-data-vodacom.sql` via SQL Workshop > SQL Scripts before starting
+
+> **IMPORTANT - Database Setup Required Before Starting**
+>
+> This lab teaches you to create tables manually for learning purposes. However, Labs 02-07 require the **full Vodacom database** (13 tables, 100+ rows). Before starting this course:
+>
+> 1. Go to **SQL Workshop > SQL Scripts**
+> 2. Upload and run **`setup-sample-data-vodacom.sql`**
+> 3. Then run **`vodacom-complete-lab-setup.sql`** (adds supplemental objects)
+> 4. Verify with: `SELECT table_name FROM user_tables WHERE table_name LIKE 'VODACOM%' ORDER BY 1;` (should return 13+ tables)
+>
+> The manual table creation exercises below are for **learning SQL DDL concepts only**. The setup scripts provide the production-ready schema used in all subsequent labs.
 
 ## Learning Objectives
 
@@ -55,7 +66,7 @@ You are a new developer at Vodacom, tasked with creating a modern customer manag
    
    - Click the blue **"Sign In"** button in the top right corner
    
-   🔗 **Reference Screenshot:** See [APEX Login Page](https://docs.oracle.com/en/database/oracle/apex/23.1/htmdb/img/sign_in.png)
+   🔗 **Reference Screenshot:** See [APEX Login Page](https://docs.oracle.com/en/database/oracle/apex/24.2/htmdb/img/sign_in.png)
 
 2. **Log In to Your Workspace**
    
@@ -83,7 +94,7 @@ You are a new developer at Vodacom, tasked with creating a modern customer manag
    - ④ Optional: Check "Remember workspace" to save the workspace name
    - ⑤ Click the blue **"Sign In"** button
    
-   🔗 **Reference Screenshot:** See [Workspace Sign In](https://docs.oracle.com/en/database/oracle/apex/23.1/htmdb/img/workspace_signin.png)
+   🔗 **Reference Screenshot:** See [Workspace Sign In](https://docs.oracle.com/en/database/oracle/apex/24.2/htmdb/img/workspace_signin.png)
 
 3. **Explore the Home Dashboard**
    
@@ -166,8 +177,8 @@ You are a new developer at Vodacom, tasked with creating a modern customer manag
      - Click elsewhere to close the dropdown
    
    🔗 **Reference Screenshots:** 
-   - [APEX Home Page](https://docs.oracle.com/en/database/oracle/apex/23.1/htmdb/img/apex_home.png)
-   - [Navigation Overview](https://docs.oracle.com/en/database/oracle/apex/23.1/htmdb/understanding-app-builder.html)
+   - [APEX Home Page](https://docs.oracle.com/en/database/oracle/apex/24.2/htmdb/img/apex_home.png)
+   - [Navigation Overview](https://docs.oracle.com/en/database/oracle/apex/24.2/htmdb/understanding-app-builder.html)
 
 4. **Check Workspace Information**
    
@@ -175,21 +186,21 @@ You are a new developer at Vodacom, tasked with creating a modern customer manag
    
    **Step-by-Step:**
    
-   - ① **Locate the Settings icon:**
-     - Look at the top-right corner of the page
-     - You'll see: `[VODACOM_DEV] [developer01 ▾] [⚙️ Settings]`
-     - The ⚙️ is a gear/cog icon
-   
-   - ② **Open Settings menu:**
-     - Click the **⚙️ icon** (gear icon)
+   - ① **Locate the Administration icon:**
+     - Look at the top-right area of the Workspace home page
+     - You'll see a gear/cog icon (⚙️) in the header navigation area
+     - In APEX 24.2, this is the **Administration** menu
+
+   - ② **Open the Administration menu:**
+     - Click the **⚙️ icon** (gear icon) in the top-right of the page
      - A dropdown menu appears with options:
        ```
        ┌─────────────────────────────┐
-       │ ⚙️ Settings               │
+       │ ⚙️ Administration          │
        ├─────────────────────────────┤
        │ Manage Workspace         │
-       │ SQL Workshop Preferences │
-       │ About Application Express│  ← Click this
+       │ Monitor Activity         │
+       │ About                    │  ← Click this
        └─────────────────────────────┘
        ```
    
@@ -202,8 +213,8 @@ You are a new developer at Vodacom, tasked with creating a modern customer manag
      │ About Oracle Application Express         │
      ├──────────────────────────────────────────┤
      │                                          │
-     │ Version: 23.1.0                          │
-     │ Database: Oracle Database 19c            │
+     │ Version: 24.2.x                          │
+     │ Database: Oracle Database 19c or later   │
      │ Instance: apex.oracle.com                │
      │                                          │
      │           [Close]                        │
@@ -211,19 +222,19 @@ You are a new developer at Vodacom, tasked with creating a modern customer manag
      ```
    
    - ⑤ **Record the following information in your lab notes:**
-     - APEX Version: ___23.1.0___ (or your version)
-     - Database Version: ___Oracle Database 19c___ (or your version)
+     - APEX Version: ___24.2.x___ (or your version)
+     - Database Version: ___Oracle Database 19c or later___ (or your version)
      - Instance Type: ___apex.oracle.com___ (or your instance)
    
    - ⑥ **Close the dialog:**
      - Click the **"Close"** button or click outside the dialog
    
-   🔗 **Reference:** [About APEX Dialog](https://docs.oracle.com/en/database/oracle/apex/23.1/htmdb/getting-started.html)
+   🔗 **Reference:** [About APEX Dialog](https://docs.oracle.com/en/database/oracle/apex/24.2/htmdb/getting-started.html)
 
 **Expected Results:**
 - ✅ Successfully logged into VODACOM_DEV workspace
 - ✅ Can see App Builder, SQL Workshop, and other main sections
-- ✅ APEX version 23.1 or higher displayed
+- ✅ APEX version 24.2 or higher displayed
 
 **Common Issues:**
 - If login fails, verify workspace name is correct (case-sensitive)

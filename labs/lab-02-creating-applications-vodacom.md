@@ -40,12 +40,45 @@ For comprehensive training covering **ALL 9 creation methods**, see:
 
 ---
 
+## Prerequisites Check
+
+Before starting this lab, verify your Vodacom database is fully set up. Run this in **SQL Workshop > SQL Commands**:
+
+```sql
+-- Verify all required tables exist and have data
+SELECT table_name,
+       (SELECT COUNT(*) FROM user_tables ut WHERE ut.table_name = t.table_name) AS table_exists
+FROM (
+  SELECT 'VODACOM_CUSTOMERS' AS table_name FROM dual UNION ALL
+  SELECT 'VODACOM_MOBILE_NUMBERS' FROM dual UNION ALL
+  SELECT 'VODACOM_CUSTOMER_SUPPORT' FROM dual UNION ALL
+  SELECT 'VODACOM_NETWORK_TOWERS' FROM dual UNION ALL
+  SELECT 'VODACOM_NETWORK_ISSUES' FROM dual UNION ALL
+  SELECT 'VODACOM_EMPLOYEES' FROM dual UNION ALL
+  SELECT 'VODACOM_TRANSACTIONS' FROM dual UNION ALL
+  SELECT 'VODACOM_PACKAGES' FROM dual UNION ALL
+  SELECT 'VODACOM_VODAPAY_ACCOUNTS' FROM dual UNION ALL
+  SELECT 'VODACOM_INVOICES' FROM dual UNION ALL
+  SELECT 'VODACOM_INVOICE_ITEMS' FROM dual
+) t;
+-- ALL rows should show table_exists = 1
+-- If any show 0, run setup-sample-data-vodacom.sql first
+```
+
+> **📋 Database Setup**
+>
+> Lab 02 requires the full Vodacom database. Run `setup-sample-data-vodacom.sql` via **SQL Workshop → SQL Scripts → Upload → Run**. This creates all 13 tables with sample data needed for this and all subsequent labs.
+>
+> For Labs 03-06, standalone per-lab SQL alternatives are also available (`lab-03-setup-data.sql`, `lab-04-setup-data.sql`, etc.) if you want to jump directly to a specific lab.
+
+---
+
 ## Learning Objectives
 
 By the end of this lab, you will be able to:
 1. Create an APEX application using the Create Application Wizard
 2. Build an application from a spreadsheet file
-3. Use application blueprints for rapid prototyping
+3. Install and customize sample applications
 4. Create an application from an SQL query
 5. Customize application properties and settings
 6. Understand application structure and navigation
@@ -274,7 +307,7 @@ Let's improve the dashboard with Vodacom-specific metrics.
    
    SELECT 'Open Support Tickets' AS title,
           TO_CHAR(COUNT(*), '999,999') AS value,
-          'fa-ticket-alt' AS icon,
+          'fa-ticket' AS icon,
           '#d50000' AS color
    FROM vodacom_customer_support
    WHERE status IN ('Open', 'Assigned', 'In Progress');
@@ -292,7 +325,7 @@ Let's improve the dashboard with Vodacom-specific metrics.
    - Type: **Classic Report**
    - Template: **Standard**
    - Under **Source**:
-     - Type: **PL/SQL Function Body**
+     - Type: **PL/SQL Function Body returning SQL Query**
      - PL/SQL Function Body:
    
    ```sql
@@ -725,30 +758,28 @@ Network Operations can now:
 
 ---
 
-## Part 4: Using Application Blueprints (15 minutes)
+## Part 4: Using Sample Applications (15 minutes)
 
-### Exercise 4.1: Install and Customize a Blueprint
+### Exercise 4.1: Install and Customize a Sample Application
 
-**Scenario:** APEX blueprints are pre-built application templates that you can customize for Vodacom's needs.
+**Scenario:** APEX includes pre-built sample applications that you can install and customize for Vodacom's needs.
 
 **Steps:**
 
-1. **Access Gallery**
-   - From App Builder home, click **Create**
-   - Select **Use a Blueprint**
-   - You'll see the Gallery with blueprint categories
+1. **Access the Gallery**
+   - From the APEX home page, click **Gallery**
+   - Or from App Builder, click **Create** > **Starter App**
+   - You'll see categories of installable applications
 
-2. **Browse Available Blueprints**
-   - Categories:
-     - Starter Apps
-     - Sample Apps
-     - Productivity Apps
-     - Demo Apps
+2. **Browse Available Sample Apps**
+   - Categories include:
+     - Sample Apps (full-featured examples)
+     - Starter Apps (minimal starting points)
    - Click on **Sample Database Application**
 
-3. **Preview the Blueprint**
+3. **Preview the Sample App**
    - Read the description
-   - Click **View Screenshots** to see what it includes
+   - Click **Preview** to see what it includes
    - Note the features:
      - Customers management
      - Products catalog
@@ -756,8 +787,8 @@ Network Operations can now:
      - Interactive reports and forms
      - Dashboard with charts
 
-4. **Install the Blueprint**
-   - Click **Create App from Blueprint**
+4. **Install the Sample App**
+   - Click **Install App**
    - Application Name: `Vodacom Retail Sales`
    - Click **Create Application**
 
@@ -997,8 +1028,8 @@ Test your understanding:
 - Ensure you ran the Vodacom database setup script (Lab 01)
 - Check the SQL query returns rows:
   ```sql
-  SELECT * FROM vodacom_customers; -- Should return 20+ rows
-  SELECT * FROM vodacom_mobile_numbers; -- Should return 15+ rows
+  SELECT COUNT(*) FROM vodacom_customers; -- Should return 21+ rows
+  SELECT COUNT(*) FROM vodacom_mobile_numbers; -- Should return 15+ rows
   ```
 - Verify foreign key relationships are correct
 - Re-run setup-sample-data-vodacom.sql if needed

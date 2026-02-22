@@ -4,6 +4,31 @@
 **Difficulty:** Intermediate  
 **Prerequisites:** Completed Lab 02 (Customer Portal created)
 
+> **Database Prerequisites for This Lab**
+>
+> This lab requires the `vodacom_issue_seq` sequence. Run this in SQL Workshop > SQL Commands:
+> ```sql
+> DECLARE
+>   v_count NUMBER;
+> BEGIN
+>   SELECT COUNT(*) INTO v_count FROM user_sequences WHERE sequence_name = 'VODACOM_ISSUE_SEQ';
+>   IF v_count = 0 THEN
+>     EXECUTE IMMEDIATE 'CREATE SEQUENCE vodacom_issue_seq START WITH 100 INCREMENT BY 1 NOCACHE NOCYCLE';
+>     DBMS_OUTPUT.PUT_LINE('Sequence vodacom_issue_seq created.');
+>   ELSE
+>     DBMS_OUTPUT.PUT_LINE('Sequence vodacom_issue_seq already exists.');
+>   END IF;
+> END;
+> /
+> ```
+
+> **🔄 Alternative: Standalone SQL Setup**
+>
+> If you have NOT run the main `setup-sample-data-vodacom.sql` script, you can use the standalone Lab 03 setup instead. This creates only the tables needed for this lab:
+> - Upload `lab-03-setup-data.sql` via **SQL Workshop → SQL Scripts → Upload → Run**
+> - Tables created: `vodacom_departments`, `vodacom_employees`, `vodacom_network_towers`, `vodacom_network_issues`
+> - Also creates: `vodacom_issue_seq` sequence
+
 ## Learning Objectives
 
 By the end of this lab, you will be able to:
@@ -144,7 +169,7 @@ You'll use Page Designer to build this complex operations page from scratch.
      - HTML Code:
        ```html
        <div class="kpi-card">
-           <div class="kpi-value">&TOTAL_TOWERS.</div>
+           <div class="kpi-value">&P10_TOTAL_TOWERS.</div>
            <div class="kpi-label">Active Towers</div>
        </div>
        ```
@@ -158,7 +183,7 @@ You'll use Page Designer to build this complex operations page from scratch.
    - Right-click **Before Header**
    - Select **Create Computation**
    - Identification:
-     - Item Name: `TOTAL_TOWERS`
+     - Item Name: `P10_TOTAL_TOWERS`
    - Computation:
      - Type: `SQL Query (return single value)`
      - SQL Query:
@@ -173,7 +198,7 @@ You'll use Page Designer to build this complex operations page from scratch.
    - HTML Code:
      ```html
      <div class="kpi-card">
-         <div class="kpi-value" style="color: #d32f2f;">&ACTIVE_ISSUES.</div>
+         <div class="kpi-value" style="color: #d32f2f;">&P10_ACTIVE_ISSUES.</div>
          <div class="kpi-label">Active Network Issues</div>
      </div>
      ```
@@ -189,7 +214,7 @@ You'll use Page Designer to build this complex operations page from scratch.
    - HTML Code:
      ```html
      <div class="kpi-card">
-         <div class="kpi-value" style="color: #FF9800;">&AFFECTED_CUSTOMERS.</div>
+         <div class="kpi-value" style="color: #FF9800;">&P10_AFFECTED_CUSTOMERS.</div>
          <div class="kpi-label">Affected Customers</div>
      </div>
      ```
@@ -205,7 +230,7 @@ You'll use Page Designer to build this complex operations page from scratch.
    - HTML Code:
      ```html
      <div class="kpi-card">
-         <div class="kpi-value" style="color: #4CAF50;">&AVG_RESOLUTION.</div>
+         <div class="kpi-value" style="color: #4CAF50;">&P10_AVG_RESOLUTION.</div>
          <div class="kpi-label">Avg Resolution (hrs)</div>
      </div>
      ```
@@ -338,7 +363,7 @@ You'll use Page Designer to build this complex operations page from scratch.
    - Appearance:
      - Button Template: `Text with Icon`
      - Hot: `Yes` (Vodacom red)
-     - Icon: `fa-save`
+     - Icon: `fa-floppy-disk`
 
 ### Exercise 2.4: Add Processing Logic
 
@@ -348,27 +373,19 @@ You'll use Page Designer to build this complex operations page from scratch.
    - Select **Create Process**
    - Identification:
      - Name: `Save Network Issues`
-     - Type: `Interactive Grid - Automatic Row Processing (DML)`
+     - Type: `Automatic Row Processing (DML)`
    - Settings:
      - Region: `Active Network Issues`
      - Editable Region: `Active Network Issues`
    - Server-side Condition:
      - When Button Pressed: `SAVE_ISSUES`
 
-2. **Add Success Message**
-   - Right-click **Processing**
-   - Select **Create Process**
-   - Identification:
-     - Name: `Show Success Message`
-     - Type: `Execute Code`
-   - Source → PL/SQL Code:
-     ```sql
-     apex_application.g_print_success_messages := TRUE;
-     ```
-   - Success Message:
+2. **Configure Success Message**
+   - Select the **Save Network Issues** process you just created
+   - In the Property Editor (right panel), find **Success Message**:
      - Success Message: `Network issue updates saved successfully!`
-   - Server-side Condition:
-     - When Button Pressed: `SAVE_ISSUES`
+
+   > **Note:** In APEX 24.2, success messages are configured declaratively on the process itself. The older approach of using `apex_application.g_print_success_messages` is deprecated. Simply set the Success Message property directly on the process.
 
 ---
 
@@ -512,26 +529,38 @@ You'll use Page Designer to build this complex operations page from scratch.
 
 ### Exercise 4.2: Add Confirmation Dialog for Delete
 
-1. **Create Dynamic Action on Grid**
-   - Right-click **Active Network Issues** Interactive Grid region
-   - Select **Create Dynamic Action**
-   - Identification:
-     - Name: `Confirm Delete Issue`
-   - When:
-     - Event: `Row Delete`
-     - Selection Type: `Region`
-     - Region: `Active Network Issues`
+In APEX 24.2, Interactive Grids handle row deletion through the built-in toolbar. To add a custom confirmation, we use a JavaScript-based approach:
 
-2. **Add Confirm Action**
-   - Right-click **True** actions
-   - Select **Create TRUE Action**
-   - Identification:
-     - Action: `Confirm`
-   - Settings:
-     - Title: `Delete Network Issue?`
-     - Message: `Are you sure you want to delete this network issue? This action cannot be undone and may affect reporting.`
-     - Style: `Danger`
-     - Button Set: `Yes/No`
+1. **Set Static ID on the Grid Region**
+   - Select the **Active Network Issues** region
+   - In the Property Editor, go to **Advanced**
+   - Static ID: `active_network_issues`
+
+2. **Add JavaScript to Page**
+   - Select **Page 10** in the Rendering tree
+   - In the Property Editor, go to **JavaScript > Execute when Page Loads**
+   - Add the following code:
+     ```javascript
+     // Add delete confirmation for Network Issues grid
+     var ig$ = apex.region("active_network_issues").widget();
+     var grid = ig$.interactiveGrid("getActions");
+     var origDelete = grid.lookup("row-delete");
+     if (origDelete) {
+         origDelete.action = function(event, focusElement) {
+             apex.message.confirm(
+                 "Are you sure you want to delete this network issue? This action cannot be undone and may affect reporting.",
+                 function(okPressed) {
+                     if (okPressed) {
+                         // Perform the actual delete
+                         ig$.interactiveGrid("getActions").invoke("selection-delete");
+                     }
+                 }
+             );
+         };
+     }
+     ```
+
+> **Note:** In APEX 24.2, there is no "Row Delete" Dynamic Action event for Interactive Grids. Instead, use the Interactive Grid JavaScript API to intercept the delete action and show a confirmation dialog. The `apex.message.confirm()` function provides a standard confirmation dialog.
 
 ### Exercise 4.3: Add Quick Report Dialog for Critical Issues
 
@@ -665,9 +694,10 @@ You'll use Page Designer to build this complex operations page from scratch.
 ### Exercise 5.2: Debug Using Page Designer
 
 1. **Enable Debug Mode**
-   - In Page Designer, click your username (top right)
-   - Select **Debug** from dropdown
-   - Run the page again
+   - Run the page first by clicking **Run** (play icon)
+   - In the running application, look at the **Developer Toolbar** at the bottom of the page
+   - Click **Debug** in the Developer Toolbar to enable debug mode
+   - Navigate or refresh the page to capture debug data
 
 2. **View Debug Output**
    - After page loads, click **View Debug** link (bottom of page)
@@ -722,11 +752,11 @@ Before completing this lab, verify:
 **KPIs not displaying:**
 - Check computations are in "Before Header" processing point
 - Verify SQL queries return single values
-- Check item names match substitution strings (&ITEM_NAME.)
+- Check item names match substitution strings (e.g., &P10_TOTAL_TOWERS.)
 - Ensure VODACOM_NETWORK_ISSUES and VODACOM_NETWORK_TOWERS tables have data
 
 **Grid not saving:**
-- Verify process type is "Interactive Grid - Automatic Row Processing"
+- Verify process type is "Automatic Row Processing (DML)"
 - Check "When Button Pressed" condition points to SAVE_ISSUES
 - Ensure ISSUE_ID column is marked as primary key
 - Check table has proper UPDATE privileges

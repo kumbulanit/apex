@@ -1,8 +1,102 @@
 # Lab 06: Security and Performance
 
-**Duration:** 120 minutes  
-**Difficulty:** Advanced  
+**Duration:** 120 minutes
+**Difficulty:** Advanced
 **Prerequisites:** Completed Lab 05 (Navigation and Controls)
+
+---
+
+### ⚠️ Prerequisites Check
+
+Before starting this lab, verify the required Vodacom tables exist and create any additional objects needed. Run the following in **SQL Workshop → SQL Commands**:
+
+```sql
+-- Verify core tables exist (should return 13 rows)
+SELECT table_name
+FROM user_tables
+WHERE table_name LIKE 'VODACOM_%'
+ORDER BY table_name;
+```
+
+You should see **13 Vodacom tables**. If they are missing, run `setup-sample-data-vodacom.sql` first.
+
+**Create the customer assignments table** (needed for row-level security in Exercise 2.2):
+
+```sql
+-- Create customer-to-agent assignments table
+-- This is used by the VPD policy in Exercise 2.2
+BEGIN
+  EXECUTE IMMEDIATE '
+    CREATE TABLE vodacom_customer_assignments (
+        assignment_id    NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        customer_id      NUMBER NOT NULL,
+        agent_emp_id     NUMBER NOT NULL,
+        assignment_status VARCHAR2(20) DEFAULT ''Active'',
+        assigned_date    DATE DEFAULT SYSDATE,
+        CONSTRAINT fk_assign_customer FOREIGN KEY (customer_id)
+            REFERENCES vodacom_customers(customer_id),
+        CONSTRAINT fk_assign_employee FOREIGN KEY (agent_emp_id)
+            REFERENCES vodacom_employees(emp_id)
+    )';
+  DBMS_OUTPUT.PUT_LINE('Created: vodacom_customer_assignments');
+EXCEPTION
+  WHEN OTHERS THEN
+    IF SQLCODE = -955 THEN
+      DBMS_OUTPUT.PUT_LINE('Table vodacom_customer_assignments already exists');
+    ELSE
+      RAISE;
+    END IF;
+END;
+/
+
+-- Add assigned_tech column to network_towers if not present
+BEGIN
+  EXECUTE IMMEDIATE 'ALTER TABLE vodacom_network_towers ADD (assigned_tech NUMBER)';
+  DBMS_OUTPUT.PUT_LINE('Added: assigned_tech column to vodacom_network_towers');
+EXCEPTION
+  WHEN OTHERS THEN
+    IF SQLCODE = -1430 THEN
+      DBMS_OUTPUT.PUT_LINE('Column assigned_tech already exists');
+    ELSE
+      RAISE;
+    END IF;
+END;
+/
+
+-- Populate sample assignments (assign first 5 agents to customers)
+BEGIN
+  INSERT INTO vodacom_customer_assignments (customer_id, agent_emp_id, assignment_status)
+  SELECT c.customer_id, e.emp_id, 'Active'
+  FROM vodacom_customers c
+  CROSS JOIN (SELECT emp_id FROM vodacom_employees WHERE ROWNUM <= 3) e
+  WHERE c.customer_id <= 10
+    AND NOT EXISTS (
+      SELECT 1 FROM vodacom_customer_assignments ca
+      WHERE ca.customer_id = c.customer_id AND ca.agent_emp_id = e.emp_id
+    );
+  COMMIT;
+  DBMS_OUTPUT.PUT_LINE('Populated sample customer assignments');
+EXCEPTION
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('Assignments may already exist: ' || SQLERRM);
+END;
+/
+```
+
+> **🔄 Alternative: Standalone SQL Setup**
+>
+> If you have NOT run the main `setup-sample-data-vodacom.sql` script, you can use the standalone Lab 06 setup instead. This creates ALL tables needed for this lab including the Lab 06 specific objects:
+> - Upload `lab-06-setup-data.sql` via **SQL Workshop → SQL Scripts → Upload → Run**
+> - Tables created: All Lab 05 tables plus `vodacom_network_towers` (with `assigned_tech`), `vodacom_network_issues`, `vodacom_sales`, `vodacom_customer_assignments`, `vodacom_audit_log`
+> - Also creates: `vodacom_issue_seq` sequence, `category` column on packages
+
+> **Note:** The VPD policy in Exercise 2.2 uses `DBMS_RLS`. If you are on Oracle Cloud (Autonomous Database), the `DBMS_RLS` privilege must be granted by the ADMIN user:
+> ```sql
+> -- Run as ADMIN user on Oracle Cloud:
+> GRANT EXECUTE ON DBMS_RLS TO your_workspace_schema;
+> ```
+
+---
 
 ## Learning Objectives
 
@@ -125,7 +219,7 @@ Vodacom needs enterprise-grade security and performance:
    - Authorization Scheme: `Call Center Agent Access`
 
 4. **Protect Navigation Menu Items**
-   - Shared Components → Navigation → **Navigation Menu**
+   - Shared Components → Navigation and Search → **Navigation Menu**
    - Edit **Network Operations** menu entry:
      - Authorization Scheme: `Network Operations Access`
    - Edit **Analytics & Reports** menu:
@@ -505,19 +599,26 @@ END;
 
 ### Exercise 3.3: Configure Password Policies
 
-1. **Access Authentication Scheme**
-   - Shared Components → Security → **Authentication Schemes**
-   - Edit **Application Express Authentication**
+> **Important:** Password policies in Oracle APEX are configured at the **Instance Administration** level, not within individual Authentication Schemes. You need Instance Administrator access.
 
-2. **Set Vodacom Password Requirements**
-   - Settings:
+1. **Access Instance Administration**
+   - Navigate to the APEX Instance Administration login page
+   - URL pattern: `https://your-apex-host/ords/apex_admin`
+   - Log in with your Instance Administrator credentials
+
+2. **Configure Password Policy**
+   - Instance Administration → **Manage Instance** → **Security**
+   - Under **Workspace Password Policy**, set:
      - Minimum Password Length: `12` (POPIA requirement)
-     - Require Mixed Case: `Yes`
-     - Require Numeric Characters: `Yes`
-     - Require Special Characters: `Yes`
-     - Require Non-Alphanumeric: `2`
-     - Password History: `5` (cannot reuse last 5 passwords)
-     - Maximum Password Age: `90` days
+     - Must Contain At Least One Upper Case Character: `Yes`
+     - Must Contain At Least One Lower Case Character: `Yes`
+     - Must Contain At Least One Numeric Character: `Yes`
+     - Must Contain At Least One Punctuation Character: `Yes`
+     - Minimum Password Differences: `2`
+     - Password History Depth: `5` (cannot reuse last 5 passwords)
+     - Maximum Password Age (Days): `90`
+
+> **Note:** If you do not have Instance Admin access (common in training environments), ask your instructor to configure these settings. The key takeaway is that password policies are enforced at the instance level, not per application.
 
 ---
 
@@ -553,7 +654,7 @@ END;
    SELECT c.customer_id,
           c.account_number,
           c.first_name || ' ' || c.last_name AS customer_name,
-          COUNT(DISTINCT mn.mobile_number_id) AS total_numbers,
+          COUNT(DISTINCT mn.number_id) AS total_numbers,
           SUM(mn.airtime_balance + mn.data_balance_mb * 0.15) AS total_balance
    FROM vodacom_customers c
    LEFT JOIN vodacom_mobile_numbers mn ON c.customer_id = mn.customer_id
@@ -564,30 +665,52 @@ END;
    ```
 
 2. **Add Missing Indexes for Vodacom Tables**
+
+   > **Note:** If some indexes already exist, the script handles this gracefully using PL/SQL exception handling (ORA-00955 = name already used).
+
    ```sql
    -- Critical indexes for performance
-   
-   -- Foreign key indexes (MUST HAVE)
-   CREATE INDEX idx_mobile_customer_id ON vodacom_mobile_numbers(customer_id);
-   CREATE INDEX idx_trans_customer_id ON vodacom_transactions(customer_id);
-   CREATE INDEX idx_support_customer_id ON vodacom_customer_support(customer_id);
-   CREATE INDEX idx_invoice_customer_id ON vodacom_invoices(customer_id);
-   CREATE INDEX idx_network_issue_tower ON vodacom_network_issues(tower_id);
-   
-   -- Frequently filtered columns
-   CREATE INDEX idx_customer_status ON vodacom_customers(account_status);
-   CREATE INDEX idx_customer_province ON vodacom_customers(province);
-   CREATE INDEX idx_customer_vodapay ON vodacom_customers(vodapay_active);
-   CREATE INDEX idx_mobile_status ON vodacom_mobile_numbers(status);
-   CREATE INDEX idx_trans_date ON vodacom_transactions(transaction_date);
-   
-   -- Composite indexes for common queries
-   CREATE INDEX idx_customer_prov_status ON vodacom_customers(province, account_status);
-   CREATE INDEX idx_trans_cust_date ON vodacom_transactions(customer_id, transaction_date);
-   CREATE INDEX idx_mobile_cust_status ON vodacom_mobile_numbers(customer_id, status);
-   
-   -- Function-based index for case-insensitive search
-   CREATE INDEX idx_customer_name_upper ON vodacom_customers(UPPER(first_name || ' ' || last_name));
+   -- Wrapped in PL/SQL to safely skip indexes that already exist
+
+   DECLARE
+     PROCEDURE safe_create_index(p_sql VARCHAR2) IS
+     BEGIN
+       EXECUTE IMMEDIATE p_sql;
+       DBMS_OUTPUT.PUT_LINE('Created: ' || SUBSTR(p_sql, 1, 80));
+     EXCEPTION
+       WHEN OTHERS THEN
+         IF SQLCODE = -955 THEN
+           DBMS_OUTPUT.PUT_LINE('Already exists: ' || SUBSTR(p_sql, 1, 80));
+         ELSIF SQLCODE = -1408 THEN
+           DBMS_OUTPUT.PUT_LINE('Column list already indexed: ' || SUBSTR(p_sql, 1, 80));
+         ELSE
+           DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM || ' for: ' || SUBSTR(p_sql, 1, 80));
+         END IF;
+     END;
+   BEGIN
+     -- Foreign key indexes (MUST HAVE)
+     safe_create_index('CREATE INDEX idx_mobile_customer_id ON vodacom_mobile_numbers(customer_id)');
+     safe_create_index('CREATE INDEX idx_trans_customer_id ON vodacom_transactions(customer_id)');
+     safe_create_index('CREATE INDEX idx_support_customer_id ON vodacom_customer_support(customer_id)');
+     safe_create_index('CREATE INDEX idx_invoice_customer_id ON vodacom_invoices(customer_id)');
+     safe_create_index('CREATE INDEX idx_network_issue_tower ON vodacom_network_issues(tower_id)');
+
+     -- Frequently filtered columns
+     safe_create_index('CREATE INDEX idx_customer_status ON vodacom_customers(account_status)');
+     safe_create_index('CREATE INDEX idx_customer_province ON vodacom_customers(province)');
+     safe_create_index('CREATE INDEX idx_customer_vodapay ON vodacom_customers(vodapay_active)');
+     safe_create_index('CREATE INDEX idx_mobile_status ON vodacom_mobile_numbers(status)');
+     safe_create_index('CREATE INDEX idx_trans_date ON vodacom_transactions(transaction_date)');
+
+     -- Composite indexes for common queries
+     safe_create_index('CREATE INDEX idx_customer_prov_status ON vodacom_customers(province, account_status)');
+     safe_create_index('CREATE INDEX idx_trans_cust_date ON vodacom_transactions(customer_id, transaction_date)');
+     safe_create_index('CREATE INDEX idx_mobile_cust_status ON vodacom_mobile_numbers(customer_id, status)');
+
+     -- Function-based index for case-insensitive search
+     safe_create_index('CREATE INDEX idx_customer_name_upper ON vodacom_customers(UPPER(first_name || '' '' || last_name))');
+   END;
+   /
    ```
 
 3. **Rewrite Inefficient Customer Query**
@@ -609,7 +732,7 @@ END;
      ```sql
      SELECT c.customer_id,
             c.first_name || ' ' || c.last_name AS customer_name,
-            COUNT(DISTINCT mn.mobile_number_id) AS mobile_count,
+            COUNT(DISTINCT mn.number_id) AS mobile_count,
             SUM(t.amount) AS total_spent
      FROM vodacom_customers c
      LEFT JOIN vodacom_mobile_numbers mn ON c.customer_id = mn.customer_id
@@ -736,7 +859,7 @@ END;
          v_total NUMBER;
          v_vat NUMBER;
        BEGIN
-         SELECT SUM((quantity * unit_price) + NVL(tax_amount, 0))
+         SELECT SUM(amount)
          INTO v_total
          FROM vodacom_invoice_items
          WHERE invoice_id = :P30_INVOICE_ID;

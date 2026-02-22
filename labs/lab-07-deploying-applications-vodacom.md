@@ -1,8 +1,33 @@
 # Lab 07: Deploying Vodacom Applications
 
-**Duration:** 90 minutes  
-**Difficulty:** Advanced  
+**Duration:** 90 minutes
+**Difficulty:** Advanced
 **Prerequisites:** Completed Lab 06 (Security and Performance optimized)
+
+---
+
+### ⚠️ Prerequisites Check
+
+Before starting this lab, verify your Vodacom application is ready for deployment. Run in **SQL Workshop → SQL Commands**:
+
+```sql
+-- Verify all Vodacom tables exist (should return 13+ rows)
+SELECT table_name
+FROM user_tables
+WHERE table_name LIKE 'VODACOM_%'
+ORDER BY table_name;
+```
+
+You should see at least **13 Vodacom tables**. If missing, run `setup-sample-data-vodacom.sql` first.
+
+> **Note for Oracle Cloud (Autonomous Database) users:** Some operations in this lab require database-level grants. Ask your ADMIN to run:
+> ```sql
+> -- Run as ADMIN on Oracle Cloud:
+> GRANT CREATE VIEW, CREATE PROCEDURE, CREATE TRIGGER TO your_workspace_schema;
+> GRANT EXECUTE ON DBMS_RLS TO your_workspace_schema;  -- If using VPD from Lab 06
+> ```
+
+---
 
 ## Learning Objectives
 
@@ -37,7 +62,7 @@ Vodacom is ready to deploy the Customer Service Portal to production:
 
 1. **Export Application with All Components**
    - App Builder → Your Application
-   - Export / Import → **Export**
+   - **Export / Import** → **Export**
    
    - Export Options:
      - File Format: `SQL`
@@ -795,7 +820,7 @@ Vodacom is ready to deploy the Customer Service Portal to production:
        
        steps:
          - name: Checkout Vodacom code
-           uses: actions/checkout@v3
+           uses: actions/checkout@v4
          
          - name: Install SQLcl
            run: |

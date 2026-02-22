@@ -1,8 +1,42 @@
 # Lab 05: Controls and Navigation
 
-**Duration:** 90 minutes  
-**Difficulty:** Intermediate  
+**Duration:** 90 minutes
+**Difficulty:** Intermediate
 **Prerequisites:** Completed Lab 04 (Invoice System created)
+
+---
+
+### ⚠️ Prerequisites Check
+
+Before starting this lab, verify that the required Vodacom tables exist. Run the following in **SQL Workshop → SQL Commands**:
+
+```sql
+-- Verify required tables exist
+SELECT table_name, num_rows
+FROM user_tables
+WHERE table_name IN (
+  'VODACOM_CUSTOMERS',
+  'VODACOM_MOBILE_NUMBERS',
+  'VODACOM_PACKAGES',
+  'VODACOM_TRANSACTIONS',
+  'VODACOM_INVOICES',
+  'VODACOM_INVOICE_ITEMS',
+  'VODACOM_VODAPAY_ACCOUNTS'
+)
+ORDER BY table_name;
+```
+
+You should see **7 tables** listed. If any are missing, run the setup script `setup-sample-data-vodacom.sql` first (available from your instructor or SQL Workshop → SQL Scripts).
+
+This lab also creates **3 new South African address tables** (provinces, cities, suburbs) as part of Exercise 2.1. These are self-contained and do not require prior setup.
+
+> **🔄 Alternative: Standalone SQL Setup**
+>
+> If you have NOT run the main `setup-sample-data-vodacom.sql` script, you can use the standalone Lab 05 setup instead. This creates all the tables needed for this lab including the SA address tables:
+> - Upload `lab-05-setup-data.sql` via **SQL Workshop → SQL Scripts → Upload → Run**
+> - Tables created: All Lab 04 tables plus `vodacom_sa_provinces`, `vodacom_sa_cities`, `vodacom_sa_suburbs`
+
+---
 
 ## Learning Objectives
 
@@ -32,7 +66,7 @@ Vodacom needs to improve navigation and data entry workflows:
 
 1. **Access Navigation Menu**
    - App Builder → Your Application
-   - Shared Components → Navigation → **Navigation Menu**
+   - Shared Components → Navigation and Search → **Navigation Menu**
    - Click **Desktop Navigation Menu**
 
 2. **Add Parent Menu Entries for Vodacom Operations**
@@ -73,28 +107,28 @@ Vodacom needs to improve navigation and data entry workflows:
    **VodaPay Transactions (child of VodaPay & Billing):**
    - Parent List Entry: `VodaPay & Billing`
    - Sequence: `10`
-   - Image/Class: `fa-exchange`
+   - Image/Class: `fa-right-left`
    - List Entry Label: `VodaPay Transactions`
    - Page: `25`
    
    **Customer Invoices (child of VodaPay & Billing):**
    - Parent List Entry: `VodaPay & Billing`
    - Sequence: `20`
-   - Image/Class: `fa-file-text-o`
+   - Image/Class: `fa-file-lines`
    - List Entry Label: `Customer Invoices`
    - Page: `29`
    
    **Reports:**
    - Parent List Entry: `-- Top Level Entry --`
    - Sequence: `50`
-   - Image/Class: `fa-bar-chart`
+   - Image/Class: `fa-chart-bar`
    - List Entry Label: `Analytics & Reports`
    - URL Target: `#`
    
    **Customer Analysis (child of Reports):**
    - Parent List Entry: `Analytics & Reports`
    - Sequence: `10`
-   - Image/Class: `fa-pie-chart`
+   - Image/Class: `fa-chart-pie`
    - List Entry Label: `Customer Analysis`
    - Page: `20`
 
@@ -110,7 +144,7 @@ Vodacom needs to improve navigation and data entry workflows:
 ### Exercise 1.2: Configure Breadcrumbs
 
 1. **Access Breadcrumb**
-   - Shared Components → Navigation → **Breadcrumbs**
+   - Shared Components → Navigation and Search → **Breadcrumbs**
    - Click **Breadcrumb**
 
 2. **Add Breadcrumb Entries for Vodacom Pages**
@@ -372,7 +406,7 @@ COMMIT;
    - LOV:
      ```sql
      SELECT mobile_number || ' (' || number_type || ')' AS d,
-            mobile_number_id AS r
+            number_id AS r
      FROM vodacom_mobile_numbers
      WHERE customer_id = :P36_CUSTOMER_ID
        AND status = 'Active'
@@ -467,7 +501,7 @@ COMMIT;
             c.city,
             c.customer_type,
             c.account_status,
-            COUNT(DISTINCT mn.mobile_number_id) AS total_numbers,
+            COUNT(DISTINCT mn.number_id) AS total_numbers,
             SUM(mn.airtime_balance + mn.data_balance_mb * 0.15) AS total_balance,
             CASE WHEN c.vodapay_active = 'Y' THEN 'Active' ELSE 'Inactive' END AS vodapay_status
      FROM vodacom_customers c
@@ -476,8 +510,8 @@ COMMIT;
      GROUP BY c.customer_id, c.account_number, c.first_name, c.last_name,
               c.phone, c.email, c.province, c.city, c.customer_type, 
               c.account_status, c.vodapay_active
-     ORDER BY c.last_name, c.first_name
      ```
+   > **Note:** Do not include `ORDER BY` in Interactive Report source queries — APEX handles sorting via the report's **Attributes → Sort** settings. Adding `ORDER BY` prevents users from changing the sort order interactively.
 
 2. **Create Search Filter Region**
    - Create Region:
@@ -568,7 +602,7 @@ COMMIT;
    - Create Button: `RESET`
      - Label: `Reset Filters`
      - Position: `Previous`
-     - Icon: `fa-undo`
+     - Icon: `fa-rotate-left`
 
 5. **Add Reset Dynamic Action**
    - Select `RESET` button
@@ -593,7 +627,7 @@ COMMIT;
             c.city,
             c.customer_type,
             c.account_status,
-            COUNT(DISTINCT mn.mobile_number_id) AS total_numbers,
+            COUNT(DISTINCT mn.number_id) AS total_numbers,
             SUM(mn.airtime_balance + mn.data_balance_mb * 0.15) AS total_balance,
             CASE WHEN c.vodapay_active = 'Y' THEN 'Active' ELSE 'Inactive' END AS vodapay_status
      FROM vodacom_customers c
@@ -615,13 +649,13 @@ COMMIT;
         AND (:P37_MAX_BALANCE IS NULL OR 
              SUM(mn.airtime_balance + mn.data_balance_mb * 0.15) <= :P37_MAX_BALANCE)
         AND (:P37_MIN_NUMBERS IS NULL OR 
-             COUNT(DISTINCT mn.mobile_number_id) >= :P37_MIN_NUMBERS)
+             COUNT(DISTINCT mn.number_id) >= :P37_MIN_NUMBERS)
         AND (:P37_CUSTOMER_TYPE IS NULL OR 
              INSTR(':' || :P37_CUSTOMER_TYPE || ':', ':' || c.customer_type || ':') > 0)
         AND (:P37_ACCOUNT_STATUS IS NULL OR 
              INSTR(':' || :P37_ACCOUNT_STATUS || ':', ':' || c.account_status || ':') > 0)
-     ORDER BY c.last_name, c.first_name
      ```
+   > **Note:** Sorting is handled by the Interactive Report's built-in sort controls. Go to the report **Attributes → Sort** and set the default sort to `CUSTOMER_NAME` ascending if desired.
    - Page Items to Submit: `P37_SEARCH_TEXT,P37_PROVINCE,P37_CUSTOMER_TYPE,P37_ACCOUNT_STATUS,P37_MIN_BALANCE,P37_MAX_BALANCE,P37_VODAPAY_STATUS,P37_MIN_NUMBERS`
 
 ---

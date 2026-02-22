@@ -4,6 +4,23 @@
 **Difficulty:** Intermediate  
 **Prerequisites:** Completed Lab 03 (Network Operations Dashboard created)
 
+> **Database Prerequisites for This Lab**
+>
+> This lab requires the invoices tables. Verify they exist:
+> ```sql
+> SELECT COUNT(*) AS invoice_count FROM vodacom_invoices;      -- Should return 6+
+> SELECT COUNT(*) AS items_count FROM vodacom_invoice_items;    -- Should return 12+
+> SELECT COUNT(*) AS trans_count FROM vodacom_transactions;     -- Should return 15+
+> SELECT COUNT(*) AS vodapay_count FROM vodacom_vodapay_accounts; -- Should return 10+
+> ```
+> If any return 0 or error, run `setup-sample-data-vodacom.sql` via SQL Workshop > SQL Scripts.
+
+> **🔄 Alternative: Standalone SQL Setup**
+>
+> If you have NOT run the main `setup-sample-data-vodacom.sql` script, you can use the standalone Lab 04 setup instead. This creates only the tables needed for this lab:
+> - Upload `lab-04-setup-data.sql` via **SQL Workshop → SQL Scripts → Upload → Run**
+> - Tables created: `vodacom_departments`, `vodacom_employees`, `vodacom_customers`, `vodacom_mobile_numbers`, `vodacom_packages`, `vodacom_transactions`, `vodacom_customer_support`, `vodacom_vodapay_accounts`, `vodacom_invoices`, `vodacom_invoice_items`
+
 ## Learning Objectives
 
 By the end of this lab, you will be able to:
@@ -364,12 +381,12 @@ Vodacom's customer service management team needs comprehensive reporting capabil
    - Label: `Save All Changes`
    - Position: `Right of Interactive Grid Search Bar`
    - Hot: `Yes`
-   - Icon: `fa-save`
+   - Icon: `fa-floppy-disk`
 
 5. **Add Process**
    - Create Process:
      - Name: `Process VodaPay Transactions`
-     - Type: `Interactive Grid - Automatic Row Processing (DML)`
+     - Type: `Automatic Row Processing (DML)`
      - Editable Region: `VodaPay Transaction Reconciliation`
      - When Button Pressed: `SAVE_TRANSACTIONS`
      - Success Message: `VodaPay transactions saved successfully!`
@@ -433,15 +450,14 @@ Vodacom's customer service management team needs comprehensive reporting capabil
    - Sequence: `20` (after form items)
    - SQL Query:
      ```sql
-     SELECT li.line_item_id,
+     SELECT li.item_id,
             li.invoice_id,
             li.item_type,
             li.description,
             li.quantity,
             li.unit_price,
-            li.quantity * li.unit_price AS line_total,
-            li.tax_amount,
-            (li.quantity * li.unit_price) + NVL(li.tax_amount, 0) AS total_with_tax
+            li.amount,
+            li.quantity * li.unit_price AS line_total
      FROM vodacom_invoice_items li
      WHERE li.invoice_id = :P30_INVOICE_ID
          -- Sorting handled via Interactive Grid attributes
@@ -454,10 +470,10 @@ Vodacom's customer service management team needs comprehensive reporting capabil
      - Add Row: `Yes`
      - Delete Row: `Yes`
    
-   - **LINE_ITEM_ID**:
+   - **ITEM_ID**:
      - Type: `Hidden`
      - Primary Key: `Yes`
-   - In the detail grid's **Attributes → Sort** section, add `LINE_ITEM_ID` ascending so rows keep their natural order without an `ORDER BY` clause.
+   - In the detail grid's **Attributes → Sort** section, add `ITEM_ID` ascending so rows keep their natural order without an `ORDER BY` clause.
    
    - **INVOICE_ID**:
      - Type: `Hidden`
@@ -493,15 +509,14 @@ Vodacom's customer service management team needs comprehensive reporting capabil
      - Heading: `Subtotal (R)`
      - Format Mask: `FML999G999G990D00`
    
-   - **TAX_AMOUNT**:
-     - Type: `Number Field`
-     - Heading: `VAT (R)`
-     - Format Mask: `FML999G990D00`
-     - Default: `0`
-   
-   - **TOTAL_WITH_TAX**:
+   - **AMOUNT**:
      - Type: `Display Only`
-     - Heading: `Total (R)`
+     - Heading: `Amount (R)`
+     - Format Mask: `FML999G999G990D00`
+
+   - **LINE_TOTAL**:
+     - Type: `Display Only`
+     - Heading: `Calculated Total (R)`
      - Format Mask: `FML999G999G990D00`
 
 5. **Add Calculate Total Button**
@@ -522,7 +537,7 @@ Vodacom's customer service management team needs comprehensive reporting capabil
          v_total NUMBER;
          v_vat NUMBER;
        BEGIN
-         SELECT SUM((quantity * unit_price) + NVL(tax_amount, 0))
+         SELECT SUM(amount)
          INTO v_total
          FROM vodacom_invoice_items
          WHERE invoice_id = :P30_INVOICE_ID;
@@ -543,7 +558,7 @@ Vodacom's customer service management team needs comprehensive reporting capabil
 7. **Add Process for Line Items**
    - Create Process:
      - Name: `Save Invoice Line Items`
-     - Type: `Interactive Grid - Automatic Row Processing (DML)`
+     - Type: `Automatic Row Processing (DML)`
      - Editable Region: `Invoice Line Items`
      - Success Message: `Invoice line items saved successfully!`
 
