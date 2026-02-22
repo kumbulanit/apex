@@ -367,6 +367,7 @@ ALTER TABLE vodacom_mobile_numbers ADD CONSTRAINT fk_num_customer FOREIGN KEY (c
 ALTER TABLE vodacom_transactions ADD CONSTRAINT fk_trans_customer FOREIGN KEY (customer_id) REFERENCES vodacom_customers(customer_id);
 ALTER TABLE vodacom_transactions ADD CONSTRAINT fk_trans_package FOREIGN KEY (package_id) REFERENCES vodacom_packages(package_id);
 ALTER TABLE vodacom_customer_support ADD CONSTRAINT fk_support_customer FOREIGN KEY (customer_id) REFERENCES vodacom_customers(customer_id);
+ALTER TABLE vodacom_customer_support ADD CONSTRAINT fk_support_emp FOREIGN KEY (assigned_to) REFERENCES vodacom_employees(emp_id);
 ALTER TABLE vodacom_vodapay_accounts ADD CONSTRAINT fk_vodapay_customer FOREIGN KEY (customer_id) REFERENCES vodacom_customers(customer_id);
 ALTER TABLE vodacom_invoices ADD CONSTRAINT fk_invoice_customer FOREIGN KEY (customer_id) REFERENCES vodacom_customers(customer_id);
 ALTER TABLE vodacom_invoice_items ADD CONSTRAINT fk_item_invoice FOREIGN KEY (invoice_id) REFERENCES vodacom_invoices(invoice_id) ON DELETE CASCADE;

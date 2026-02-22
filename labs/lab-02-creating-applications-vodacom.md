@@ -65,11 +65,13 @@ FROM (
 -- If any show 0, run setup-sample-data-vodacom.sql first
 ```
 
-> **📋 Database Setup**
+> **📋 Database Setup — Required**
 >
 > Lab 02 requires the full Vodacom database. Run `setup-sample-data-vodacom.sql` via **SQL Workshop → SQL Scripts → Upload → Run**. This creates all 13 tables with sample data needed for this and all subsequent labs.
 >
-> For Labs 03-06, standalone per-lab SQL alternatives are also available (`lab-03-setup-data.sql`, `lab-04-setup-data.sql`, etc.) if you want to jump directly to a specific lab.
+> **⚠️ There is no standalone script for Lab 02** — the full `setup-sample-data-vodacom.sql` is the only option for this lab.
+>
+> *(For Labs 03–06, standalone per-lab alternatives are available: `lab-03-setup-data.sql`, `lab-04-setup-data.sql`, `lab-05-setup-data.sql`, `lab-06-setup-data.sql` — if participants want to jump directly to a later lab without running the main script.)*
 
 ---
 

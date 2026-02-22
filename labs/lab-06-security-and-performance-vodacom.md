@@ -6,9 +6,15 @@
 
 ---
 
-### ⚠️ Prerequisites Check
+### ⚠️ Prerequisites Check — Choose ONE Setup Approach
 
-Before starting this lab, verify the required Vodacom tables exist and create any additional objects needed. Run the following in **SQL Workshop → SQL Commands**:
+> **⚠️ IMPORTANT: Choose only ONE of the two setup options below. Do NOT run both.**
+
+---
+
+#### 🅰️ Option A: Already ran the main setup script (most participants)
+
+If you ran `setup-sample-data-vodacom.sql` in a previous lab, verify your tables then add the Lab 06 extras. Run the following in **SQL Workshop → SQL Commands**:
 
 ```sql
 -- Verify core tables exist (should return 13 rows)
@@ -18,9 +24,9 @@ WHERE table_name LIKE 'VODACOM_%'
 ORDER BY table_name;
 ```
 
-You should see **13 Vodacom tables**. If they are missing, run `setup-sample-data-vodacom.sql` first.
+You should see **13 Vodacom tables**. If they are missing, switch to Option B below.
 
-**Create the customer assignments table** (needed for row-level security in Exercise 2.2):
+**Then create the customer assignments table** (needed for row-level security in Exercise 2.2):
 
 ```sql
 -- Create customer-to-agent assignments table
@@ -83,12 +89,18 @@ END;
 /
 ```
 
-> **🔄 Alternative: Standalone SQL Setup**
->
-> If you have NOT run the main `setup-sample-data-vodacom.sql` script, you can use the standalone Lab 06 setup instead. This creates ALL tables needed for this lab including the Lab 06 specific objects:
+---
+
+#### 🅱️ Option B: Starting fresh at Lab 06 (skip Option A entirely)
+
+If you have NOT run `setup-sample-data-vodacom.sql`, use the standalone script — it creates everything in one shot:
+
 > - Upload `lab-06-setup-data.sql` via **SQL Workshop → SQL Scripts → Upload → Run**
-> - Tables created: All Lab 05 tables plus `vodacom_network_towers` (with `assigned_tech`), `vodacom_network_issues`, `vodacom_sales`, `vodacom_customer_assignments`, `vodacom_audit_log`
-> - Also creates: `vodacom_issue_seq` sequence, `category` column on packages
+> - Creates ALL 19 tables with full data: departments, employees, customers, mobile numbers, packages, transactions, customer support, VodaPay, invoices, invoice items, network towers (with `assigned_tech`), network issues, sales, SA address tables, customer assignments, and audit log
+> - Also creates: `vodacom_issue_seq` sequence and `category` column on packages
+> - After the script finishes successfully, skip to the **DBMS_RLS note** below and proceed with Exercise 1.1
+
+---
 
 > **Note:** The VPD policy in Exercise 2.2 uses `DBMS_RLS`. If you are on Oracle Cloud (Autonomous Database), the `DBMS_RLS` privilege must be granted by the ADMIN user:
 > ```sql
