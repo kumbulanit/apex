@@ -592,7 +592,7 @@ Configuration tips:
         ROUND((CAST(ni.resolved_date AS DATE) - CAST(ni.reported_date AS DATE)) * 24, 1)
     ELSE
         ROUND((SYSDATE - CAST(ni.reported_date AS DATE)) * 24, 1)
-  END AS hours_to_resolve,
+    END AS hours_to_resolve,
           ni.status,
            CASE ni.status
               WHEN 'Open' THEN 1
@@ -608,9 +608,9 @@ Configuration tips:
           END AS status_badge,
           e.first_name || ' ' || e.last_name AS assigned_technician,
           ni.description
-   FROM vodacom_network_issues ni
-   LEFT JOIN vodacom_network_towers nt ON ni.tower_id = nt.tower_id
-   LEFT JOIN vodacom_employees e ON ni.assigned_to = e.emp_id
+     FROM vodacom_network_issues ni
+     LEFT JOIN vodacom_network_towers nt ON ni.tower_id = nt.tower_id
+     LEFT JOIN vodacom_employees e ON ni.assigned_to = e.emp_id
       -- Sorting handled via Interactive Report Attributes
    ```
    
