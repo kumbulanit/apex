@@ -592,7 +592,7 @@ Configuration tips:
         ROUND((CAST(ni.resolved_date AS DATE) - CAST(ni.reported_date AS DATE)) * 24, 1)
     ELSE
         ROUND((SYSDATE - CAST(ni.reported_date AS DATE)) * 24, 1)
-END AS hours_to_resolve,
+  END AS hours_to_resolve,
           ni.status,
            CASE ni.status
               WHEN 'Open' THEN 1
