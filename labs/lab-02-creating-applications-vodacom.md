@@ -593,7 +593,6 @@ Configuration tips:
     ELSE
         ROUND((SYSDATE - CAST(ni.reported_date AS DATE)) * 24, 1)
 END AS hours_to_resolve,
-,
           ni.status,
            CASE ni.status
               WHEN 'Open' THEN 1
