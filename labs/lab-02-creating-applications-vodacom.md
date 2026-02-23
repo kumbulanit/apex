@@ -588,11 +588,12 @@ Configuration tips:
               ELSE CAST(NULL AS TIMESTAMP)
            END AS resolved_date,
           CASE 
-              WHEN ni.status = 'Resolved' THEN 
-                  ROUND((ni.resolved_date - ni.reported_date) * 24, 1)
-              ELSE
-                  ROUND((SYSDATE - ni.reported_date) * 24, 1)
-          END AS hours_to_resolve,
+    WHEN ni.status = 'Resolved' THEN 
+        ROUND((CAST(ni.resolved_date AS DATE) - CAST(ni.reported_date AS DATE)) * 24, 1)
+    ELSE
+        ROUND((SYSDATE - CAST(ni.reported_date AS DATE)) * 24, 1)
+END AS hours_to_resolve,
+,
           ni.status,
            CASE ni.status
               WHEN 'Open' THEN 1
