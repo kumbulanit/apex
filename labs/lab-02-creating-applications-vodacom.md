@@ -666,11 +666,11 @@ Configuration tips:
            END AS priority_rank,
           cs.status,
           cs.created_date,
-          ROUND(SYSDATE - cs.created_date, 1) AS days_open,
-          CASE 
-              WHEN cs.priority = 'Urgent' AND SYSDATE - cs.created_date > 1 THEN 'SLA BREACH'
-              WHEN cs.priority = 'High' AND SYSDATE - cs.created_date > 2 THEN 'SLA BREACH'
-              WHEN cs.priority = 'Normal' AND SYSDATE - cs.created_date > 5 THEN 'SLA BREACH'
+          ROUND(SYSDATE - CAST(cs.created_date AS DATE), 1) AS days_open,
+          CASE
+              WHEN cs.priority = 'Urgent' AND SYSDATE - CAST(cs.created_date AS DATE) > 1 THEN 'SLA BREACH'
+              WHEN cs.priority = 'High' AND SYSDATE - CAST(cs.created_date AS DATE) > 2 THEN 'SLA BREACH'
+              WHEN cs.priority = 'Normal' AND SYSDATE - CAST(cs.created_date AS DATE) > 5 THEN 'SLA BREACH'
               ELSE 'Within SLA'
           END AS sla_status,
           e.first_name || ' ' || e.last_name AS assigned_agent,
