@@ -288,7 +288,7 @@ Vodacom's customer service management team needs comprehensive reporting capabil
             t.status,
             t.package_id,
             p.package_name,
-            t.description,
+            t.notes,
             c.customer_id
      FROM vodacom_transactions t
      JOIN vodacom_customers c ON t.customer_id = c.customer_id
