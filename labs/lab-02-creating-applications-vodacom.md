@@ -652,33 +652,34 @@ Configuration tips:
    
    ```sql
    SELECT cs.ticket_number,
-          c.account_number,
-          c.first_name || ' ' || c.last_name AS customer_name,
-          c.phone,
-          cs.issue_category,
-          cs.issue_type,
-          cs.priority,
-           CASE cs.priority
-              WHEN 'Urgent' THEN 1
-              WHEN 'High' THEN 2
-              WHEN 'Normal' THEN 3
-              ELSE 4
-           END AS priority_rank,
-          cs.status,
-          cs.created_date,
-          ROUND(SYSDATE - CAST(cs.created_date AS DATE), 1) AS days_open,
-          CASE
-              WHEN cs.priority = 'Urgent' AND SYSDATE - CAST(cs.created_date AS DATE) > 1 THEN 'SLA BREACH'
-              WHEN cs.priority = 'High' AND SYSDATE - CAST(cs.created_date AS DATE) > 2 THEN 'SLA BREACH'
-              WHEN cs.priority = 'Normal' AND SYSDATE - CAST(cs.created_date AS DATE) > 5 THEN 'SLA BREACH'
-              ELSE 'Within SLA'
-          END AS sla_status,
-          e.first_name || ' ' || e.last_name AS assigned_agent,
-          cs.description
-   FROM vodacom_customer_support cs
-   JOIN vodacom_customers c ON cs.customer_id = c.customer_id
-   LEFT JOIN vodacom_employees e ON cs.assigned_to = e.emp_id
-   WHERE cs.status NOT IN ('Resolved', 'Closed')
+       c.account_number,
+       c.first_name || ' ' || c.last_name AS customer_name,
+       c.phone,
+       cs.issue_category,
+       cs.issue_type,
+       cs.priority,
+       CASE cs.priority
+           WHEN 'Urgent' THEN 1
+           WHEN 'High' THEN 2
+           WHEN 'Normal' THEN 3
+           ELSE 4
+       END AS priority_rank,
+       cs.status,
+       cs.created_date,
+       ROUND(SYSDATE - CAST(cs.created_date AS DATE), 1) AS days_open,
+       CASE 
+           WHEN cs.priority = 'Urgent' AND SYSDATE - CAST(cs.created_date AS DATE) > 1 THEN 'SLA BREACH'
+           WHEN cs.priority = 'High'   AND SYSDATE - CAST(cs.created_date AS DATE) > 2 THEN 'SLA BREACH'
+           WHEN cs.priority = 'Normal' AND SYSDATE - CAST(cs.created_date AS DATE) > 5 THEN 'SLA BREACH'
+           ELSE 'Within SLA'
+       END AS sla_status,
+       e.first_name || ' ' || e.last_name AS assigned_agent,
+       cs.description
+    FROM vodacom_customer_support cs
+    JOIN vodacom_customers c ON cs.customer_id = c.customer_id
+    LEFT JOIN vodacom_employees e ON cs.assigned_to = e.emp_id
+    WHERE cs.status NOT IN ('Resolved', 'Closed')
+
       -- Sorting handled using Interactive Report attributes
    ```
    
